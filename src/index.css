@@ -24,6 +24,7 @@
   --animate-nudge-in: nudge-in 1.6s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-splash-out: fade-out 0.6s ease 2.4s both;
   --animate-fade-in: fade-in 0.8s ease both;
+  --animate-confirm-out: fade-out 0.5s ease 1.6s both;
 
   /* The wordmark glides in from the left and lands a little
      off-line (slightly low and tilted), pauses, then gets a
