@@ -12,12 +12,13 @@
 // ==========================================================
 import { useEffect, useState } from 'react'
 import { getEmails } from './sources/mockEmailSource.js'
-import { sampleCalendar } from './data/sampleCalendar.js'
+import { buildSampleCalendar } from './data/sampleCalendar.js'
 import { getNow, skipAhead, startAt } from './clock/demoClock.js'
 import { planNudgeTimes } from './logic/planNudgeTimes.js'
 import { checkNudges } from './logic/checkNudges.js'
 import { respondToNudge } from './logic/respondToNudge.js'
 import { findLatestWaitingNudge } from './logic/findLatestWaitingNudge.js'
+import { findNextNudgeTime } from './logic/findNextNudgeTime.js'
 import { formatMonthYear } from './logic/formatDates.js'
 import { isWaitingForAnswer } from './logic/statusLabel.js'
 import { findConflicts } from './logic/findConflicts.js'
@@ -43,9 +44,6 @@ import BottomNav from './components/BottomNav.jsx'
 // How often the clock refreshes on its own, in ms
 const clockRefreshMs = 30 * 1000
 
-// The demo clock starts this long after the newest email arrived
-const demoStartGapMs = 5 * 60 * 1000
-
 // Gives an event its three planned nudges (none sent or answered yet)
 function withPlannedNudges(event, email) {
   const times = planNudgeTimes(email.receivedAt, event.startTime)
@@ -57,7 +55,7 @@ export default function App() {
   // ---- Shared state ----
   const [emails, setEmails] = useState([])
   const [events, setEvents] = useState([])
-  const [calendarEvents, setCalendarEvents] = useState(sampleCalendar)
+  const [calendarEvents, setCalendarEvents] = useState(buildSampleCalendar)
   const [now, setNow] = useState(() => getNow().toISOString())
 
   // Emails sent from Nudge (shown under SENT in Settings), newest first
@@ -104,14 +102,12 @@ export default function App() {
   const [closedNudges, setClosedNudges] = useState([])
 
   // ---- Start (or restart) the demo ----
-  // Loads the emails, starts the demo clock just after the newest
-  // one arrived (so no nudge is due yet), and plans each event's nudges.
+  // Starts the demo clock at the real current time, loads the emails
+  // (which arrived earlier today, so no nudge is due yet), and plans
+  // each event's nudges.
   function startDemo() {
     getEmails().then((loadedEmails) => {
-      const newestArrival = Math.max(
-        ...loadedEmails.map((email) => new Date(email.receivedAt).getTime()),
-      )
-      startAt(new Date(newestArrival + demoStartGapMs).toISOString())
+      startAt(new Date().toISOString())
       const demoNow = getNow().toISOString()
 
       const plannedEvents = loadedEmails
@@ -136,7 +132,7 @@ export default function App() {
   // The name and the dark/light choice are preferences, so they are kept.
   function resetDemo() {
     clearSavedDemoState()
-    setCalendarEvents(sampleCalendar)
+    setCalendarEvents(buildSampleCalendar())
     setSentEmails([])
     setClosedNudges([])
     setActiveTab('Home')
@@ -161,6 +157,15 @@ export default function App() {
   function skip(hours) {
     skipAhead(hours)
     refreshClock()
+  }
+
+  // SKIP TO NEXT NUDGE: move the clock to one minute after the next
+  // nudge is due (does nothing if no nudges are left)
+  function skipToNextNudge() {
+    const nextTime = findNextNudgeTime(events, now)
+    if (!nextTime) return
+    const hoursAway = (new Date(nextTime) - getNow()) / (60 * 60 * 1000)
+    skip(hoursAway + 1 / 60)
   }
 
   // ---- Things worked out from state ----
@@ -335,6 +340,8 @@ export default function App() {
         backLabel={activeTab}
         onToggleTheme={toggleTheme}
         onSkip={skip}
+        onSkipToNextNudge={skipToNextNudge}
+        hasNextNudge={Boolean(findNextNudgeTime(events, now))}
         onReset={resetDemo}
         onBack={goHome}
       />

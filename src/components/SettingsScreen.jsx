@@ -5,7 +5,8 @@
 // - CONNECTIONS: email and calendar accounts, all coming soon
 // - APPEARANCE: the dark / light switch
 // - SENT: emails sent from Nudge (e.g. reschedule requests)
-// - DEMO CONTROLS: the demo clock's time, SKIP and RESET DEMO
+// - DEMO CONTROLS: the demo clock's time, SKIP TO NEXT NUDGE,
+//   SKIP 6 HOURS / 1 DAY and RESET DEMO
 // ==========================================================
 import { useState } from 'react'
 import { formatDemoTime } from '../logic/formatDates.js'
@@ -59,6 +60,8 @@ export default function SettingsScreen({
   backLabel,
   onToggleTheme,
   onSkip,
+  onSkipToNextNudge,
+  hasNextNudge,
   onReset,
   onBack,
 }) {
@@ -159,6 +162,11 @@ export default function SettingsScreen({
       {/* ---- Demo controls ---- */}
       <Section title="Demo controls">
         <Row label="Demo time">{formatDemoTime(now)}</Row>
+        {hasNextNudge ? (
+          <ActionRow label="Skip to next nudge" onClick={onSkipToNextNudge} />
+        ) : (
+          <Row label="Skip to next nudge">No nudges left</Row>
+        )}
         <ActionRow label="Skip 6 hours" onClick={() => onSkip(6)} />
         <ActionRow label="Skip 1 day" onClick={() => onSkip(24)} />
         <ActionRow label="Reset demo" onClick={onReset} />

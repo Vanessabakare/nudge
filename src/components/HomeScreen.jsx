@@ -19,13 +19,13 @@ function formatIndex(position) {
   return String(position + 1).padStart(2, '0')
 }
 
-// "Good morning" before noon, "Good afternoon" until 6pm, then "Good evening",
+// "Good morning" before noon, "Good afternoon" from 12 to 5pm, then "Good evening",
 // followed by the first name if there is one: "Good afternoon, Sam"
 function greetingFor(isoString, userName) {
   const hour = new Date(isoString).getHours()
   let greeting = 'Good evening'
   if (hour < 12) greeting = 'Good morning'
-  else if (hour < 18) greeting = 'Good afternoon'
+  else if (hour < 17) greeting = 'Good afternoon'
   const firstName = firstNameOf(userName)
   return firstName ? `${greeting}, ${firstName}` : greeting
 }
