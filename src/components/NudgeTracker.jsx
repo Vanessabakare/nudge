@@ -66,11 +66,11 @@ export default function NudgeTracker({ event }) {
         return (
           <div key={index} className="relative flex flex-col items-center">
             <span className={`h-[7px] w-[7px] ${markerClass}`} />
-            <span className={`mt-4 text-center text-[8px] uppercase tracking-[0.2em] ${labelClass}`}>
+            <span className={`mt-4 text-center text-[8px] uppercase tracking-[0.2em] lg:text-[12px] ${labelClass}`}>
               {stage.label}
             </span>
             {stage.time && (
-              <span className="mt-1 text-center text-[7px] uppercase tracking-[0.15em] text-muted/60">
+              <span className="mt-1 text-center text-[7px] uppercase tracking-[0.15em] text-muted/60 lg:mt-2 lg:text-[12px]">
                 {stage.time}
               </span>
             )}

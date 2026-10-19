@@ -59,6 +59,39 @@ export function formatTimeUntil(nowIso, targetIso) {
   return plural(Math.round(minutes / (24 * 60)), 'DAY')
 }
 
+// When an email arrived, relative to now (used in the desktop inbox):
+// today -> "9:12 AM", the day before -> "YESTERDAY",
+// this past week -> "SAT", older -> "12 OCT"
+export function formatReceived(nowIso, receivedIso) {
+  const startOfToday = new Date(nowIso)
+  startOfToday.setHours(0, 0, 0, 0)
+  const startOfReceivedDay = new Date(receivedIso)
+  startOfReceivedDay.setHours(0, 0, 0, 0)
+  const daysAgo = Math.round((startOfToday - startOfReceivedDay) / (24 * 60 * 60 * 1000))
+
+  if (daysAgo <= 0) {
+    const { clock, period } = timeParts(receivedIso)
+    return `${clock} ${period}`
+  }
+  if (daysAgo === 1) return 'YESTERDAY'
+  if (daysAgo < 7) {
+    return new Date(receivedIso).toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase()
+  }
+  return formatDayMonth(receivedIso)
+}
+
+// -> "October" (the month name, as written; used large in the serif)
+export function formatMonthName(isoString) {
+  return new Date(isoString).toLocaleDateString('en-GB', { month: 'long' })
+}
+
+// -> "OCTOBER 2026"
+export function formatMonthYear(isoString) {
+  return new Date(isoString)
+    .toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+    .toUpperCase()
+}
+
 // Start and end -> "7–9PM", or "11AM–1PM" when it crosses midday
 export function formatTimeRange(startIso, endIso) {
   const start = timeParts(startIso)

@@ -3,9 +3,11 @@
 // The hero screen for one spotted event: the date set large in
 // the serif, the event details, the nudge tracker, a clash
 // warning if needed, the two choices, and the original email.
+// Phone: fills the screen. Desktop: fills the right column.
 // ==========================================================
 import { findConflicts } from '../logic/findConflicts.js'
 import { formatDayMonth, formatTimeRange, formatWeekday } from '../logic/formatDates.js'
+import BackLink from './BackLink.jsx'
 import NudgeTracker from './NudgeTracker.jsx'
 
 // Builds the clash message, e.g.
@@ -15,7 +17,14 @@ function conflictMessage(conflict) {
   return `You already have ${conflict.title}, ${timeRange}. Add anyway?`
 }
 
-export default function EventDetail({ event, email, calendarEvents, onRespond, onBack }) {
+export default function EventDetail({
+  event,
+  email,
+  calendarEvents,
+  backLabel,
+  onRespond,
+  onBack,
+}) {
   const conflicts = findConflicts(event, calendarEvents)
   const isAnswered = ['added', 'dismissed', 'expired'].includes(event.status)
 
@@ -28,29 +37,23 @@ export default function EventDetail({ event, email, calendarEvents, onRespond, o
 
   // ---- Layout ----
   return (
-    <main className="mx-auto max-w-md px-6 pt-10 pb-20 animate-fade-in">
+    <main className="mx-auto max-w-md px-6 pt-10 pb-20 animate-fade-in lg:mx-0 lg:max-w-3xl lg:px-16 lg:pt-14">
       {/* ---- Back link ---- */}
-      <button
-        type="button"
-        onClick={onBack}
-        className="text-[10px] uppercase tracking-[0.4em] text-muted hover:text-paper"
-      >
-        ← Back
-      </button>
+      <BackLink desktopLabel={backLabel} onClick={onBack} />
 
       {/* ---- The date, set large ---- */}
-      <p className="mt-16 text-[10px] uppercase tracking-[0.4em] text-muted">
+      <p className="mt-16 text-[10px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">
         {formatWeekday(event.startTime)}
       </p>
-      <h1 className="mt-3 font-serif text-[clamp(4rem,22vw,7rem)] leading-none tracking-tight text-paper">
+      <h1 className="mt-3 font-serif text-[clamp(4rem,22vw,7rem)] leading-none tracking-tight text-paper lg:text-[8rem]">
         {formatDayMonth(event.startTime)}
       </h1>
 
       {/* ---- Event details ---- */}
-      <h2 className="mt-12 text-[14px] uppercase leading-relaxed tracking-[0.25em] text-paper">
+      <h2 className="mt-12 text-[14px] uppercase leading-relaxed tracking-[0.25em] text-paper lg:text-[18px]">
         {event.title}
       </h2>
-      <div className="mt-6 space-y-2 text-[11px] uppercase tracking-[0.3em] text-muted">
+      <div className="mt-6 space-y-2 text-[11px] uppercase tracking-[0.3em] text-muted lg:text-[13px]">
         <p>{formatTimeRange(event.startTime, event.endTime)}</p>
         <p>{event.location}</p>
         <p>{event.isVirtual ? 'Virtual' : 'In person'}</p>
@@ -66,7 +69,7 @@ export default function EventDetail({ event, email, calendarEvents, onRespond, o
         conflicts.map((conflict) => (
           <p
             key={conflict.id}
-            className="mt-14 border-l border-accent pl-4 text-[11px] uppercase leading-relaxed tracking-[0.25em] text-accent"
+            className="mt-14 border-l border-accent pl-4 text-[11px] uppercase leading-relaxed tracking-[0.25em] text-accent lg:text-[13px]"
           >
             {conflictMessage(conflict)}
           </p>
@@ -74,7 +77,7 @@ export default function EventDetail({ event, email, calendarEvents, onRespond, o
 
       {/* ---- The two choices, or what was decided ---- */}
       {isAnswered ? (
-        <p className="mt-14 border-t border-line pt-6 text-[11px] uppercase tracking-[0.35em] text-muted">
+        <p className="mt-14 border-t border-line pt-6 text-[11px] uppercase tracking-[0.35em] text-muted lg:text-[13px]">
           {settledMessages[event.status]}
         </p>
       ) : (
@@ -82,14 +85,14 @@ export default function EventDetail({ event, email, calendarEvents, onRespond, o
           <button
             type="button"
             onClick={() => onRespond('add')}
-            className="flex-1 border-r border-line py-5 text-[11px] uppercase tracking-[0.3em] text-paper hover:bg-paper hover:text-ink"
+            className="flex-1 border-r border-line py-5 text-[11px] uppercase tracking-[0.3em] text-paper hover:bg-paper hover:text-ink lg:py-6 lg:text-[13px]"
           >
             Add to calendar
           </button>
           <button
             type="button"
             onClick={() => onRespond('dismiss')}
-            className="flex-1 py-5 text-[11px] uppercase tracking-[0.3em] text-muted hover:text-paper"
+            className="flex-1 py-5 text-[11px] uppercase tracking-[0.3em] text-muted hover:text-paper lg:py-6 lg:text-[13px]"
           >
             Not for me
           </button>
@@ -99,10 +102,10 @@ export default function EventDetail({ event, email, calendarEvents, onRespond, o
       {/* ---- The original email, kept quiet ---- */}
       {email && (
         <section className="mt-20">
-          <p className="text-[9px] uppercase tracking-[0.4em] text-muted/70">
+          <p className="text-[9px] uppercase tracking-[0.4em] text-muted/70 lg:text-[12px]">
             Original email · {email.sender}
           </p>
-          <p className="mt-5 whitespace-pre-line text-[12px] leading-relaxed text-muted">
+          <p className="mt-5 whitespace-pre-line text-[12px] leading-relaxed text-muted lg:text-[15px]">
             {email.body}
           </p>
         </section>
