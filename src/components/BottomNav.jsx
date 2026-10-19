@@ -2,12 +2,12 @@
 // BottomNav
 // Text-only navigation fixed to the bottom of the screen.
 // The active tab is off-white and underlined; the others are muted.
-// CALENDAR does nothing yet — it will open the calendar view later.
+// Tapping a tab tells the app to switch to it.
 // ==========================================================
 
 const tabs = ['Inbox', 'Calendar']
 
-export default function BottomNav({ activeTab }) {
+export default function BottomNav({ activeTab, onSelectTab }) {
   return (
     <nav className="fixed inset-x-0 bottom-0 border-t border-line bg-ink">
       <div className="mx-auto flex max-w-md justify-around py-6">
@@ -17,9 +17,11 @@ export default function BottomNav({ activeTab }) {
             <button
               key={tab}
               type="button"
+              onClick={() => onSelectTab(tab)}
+              aria-current={isActive ? 'page' : undefined}
               className={
                 'border-b pb-1 text-[11px] uppercase tracking-[0.4em] ' +
-                (isActive ? 'border-paper text-paper' : 'border-transparent text-muted')
+                (isActive ? 'border-paper text-paper' : 'border-transparent text-muted hover:text-paper')
               }
             >
               {tab}
