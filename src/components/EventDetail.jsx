@@ -2,7 +2,8 @@
 // EventDetail
 // The hero screen for one spotted event: the date set large in
 // the serif, the event details, the nudge tracker, a clash
-// warning if needed, the two choices, and the original email.
+// warning if needed (with an offer to reschedule the clashing
+// event), the two choices, and the original email.
 // Phone: fills the screen. Desktop: fills the right column.
 // ==========================================================
 import { findConflicts } from '../logic/findConflicts.js'
@@ -23,6 +24,7 @@ export default function EventDetail({
   calendarEvents,
   backLabel,
   onRespond,
+  onReschedule,
   onBack,
 }) {
   const conflicts = findConflicts(event, calendarEvents)
@@ -74,6 +76,17 @@ export default function EventDetail({
             {conflictMessage(conflict)}
           </p>
         ))}
+
+      {/* ---- Offer to move the clashing event instead ---- */}
+      {!isAnswered && conflicts.length > 0 && (
+        <button
+          type="button"
+          onClick={onReschedule}
+          className="mt-5 pl-4 text-[11px] uppercase tracking-[0.3em] text-paper hover:text-muted lg:text-[13px]"
+        >
+          Reschedule {conflicts[0].title} →
+        </button>
+      )}
 
       {/* ---- The two choices, or what was decided ---- */}
       {isAnswered ? (

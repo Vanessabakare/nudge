@@ -3,8 +3,8 @@
 // Holds the app's shared state (emails, spotted events, the
 // calendar and the current demo time) and decides which screen
 // to show: splash -> home (HOME, INBOX or CALENDAR tab) <-> detail
-// screens and Settings. When a nudge is waiting for an answer, a
-// nudge card appears over the home screens.
+// screens, Reschedule and Settings. When a nudge is waiting for an
+// answer, a nudge card appears over the home screens.
 //
 // Phone: one column, bottom nav, detail screens fill the screen.
 // Desktop (1024px+): a left column with title and numbered nav;
@@ -20,12 +20,15 @@ import { respondToNudge } from './logic/respondToNudge.js'
 import { findLatestWaitingNudge } from './logic/findLatestWaitingNudge.js'
 import { formatMonthYear } from './logic/formatDates.js'
 import { isWaitingForAnswer } from './logic/statusLabel.js'
+import { findConflicts } from './logic/findConflicts.js'
+import { sendEmail } from './sources/mockEmailSender.js'
 import { applyTheme, getSavedTheme, saveTheme } from './settings/theme.js'
 import { clearSavedDemoState, takeResetRequestFromUrl } from './settings/demoState.js'
 import SplashScreen from './components/SplashScreen.jsx'
 import DesktopSidebar from './components/DesktopSidebar.jsx'
 import NudgeCard from './components/NudgeCard.jsx'
 import SettingsScreen from './components/SettingsScreen.jsx'
+import RescheduleScreen from './components/RescheduleScreen.jsx'
 import HomeScreen from './components/HomeScreen.jsx'
 import InboxList from './components/InboxList.jsx'
 import CalendarView from './components/CalendarView.jsx'
@@ -55,6 +58,9 @@ export default function App() {
   const [calendarEvents, setCalendarEvents] = useState(sampleCalendar)
   const [now, setNow] = useState(() => getNow().toISOString())
 
+  // Emails sent from Nudge (shown under SENT in Settings), newest first
+  const [sentEmails, setSentEmails] = useState([])
+
   // ---- Dark or light mode (remembered in the browser) ----
   const [theme, setTheme] = useState(getSavedTheme)
 
@@ -70,10 +76,16 @@ export default function App() {
   // ---- Which screen is showing ----
   const [showSplash, setShowSplash] = useState(true)
   const [activeTab, setActiveTab] = useState('Home') // "Home" | "Inbox" | "Calendar"
-  const [screen, setScreen] = useState('home') // "home" | "detail" | "calendarEvent" | "confirmation" | "settings"
+  const [screen, setScreen] = useState('home') // "home" | "detail" | "calendarEvent" | "reschedule" | "confirmation" | "settings"
   const [selectedEventId, setSelectedEventId] = useState(null)
   const [selectedCalendarEventId, setSelectedCalendarEventId] = useState(null)
-  const [lastResponse, setLastResponse] = useState(null) // "add" | "dismiss"
+
+  // The "done" moment: { event, response: "add" | "dismiss" | "sent", returnTo: "home" | "detail" }
+  const [confirmation, setConfirmation] = useState(null)
+
+  // Rescheduling: which new event caused the clash, and where to go
+  // back to afterwards ("home" from a nudge card, "detail" from EventDetail)
+  const [rescheduleFor, setRescheduleFor] = useState(null) // { newEventId, returnTo }
 
   // The day picked in the month grid (null = show the grid)
   const [selectedDay, setSelectedDay] = useState(null)
@@ -115,6 +127,7 @@ export default function App() {
   function resetDemo() {
     clearSavedDemoState()
     setCalendarEvents(sampleCalendar)
+    setSentEmails([])
     setClosedNudges([])
     setActiveTab('Home')
     setSelectedDay(null)
@@ -149,6 +162,10 @@ export default function App() {
   )
   const waitingNudge = findLatestWaitingNudge(events, closedNudges)
 
+  // While rescheduling: the new event, and the calendar event it clashes with
+  const rescheduleNewEvent = rescheduleFor && events.find((event) => event.id === rescheduleFor.newEventId)
+  const eventToMove = rescheduleNewEvent && findConflicts(rescheduleNewEvent, calendarEvents)[0]
+
   // Desktop left column subtitle, e.g. "4 NEED YOUR ANSWER", "4 EVENTS SPOTTED", "OCTOBER 2026"
   const sidebarSubtitles = {
     Home: `${events.filter(isWaitingForAnswer).length} need your answer`,
@@ -174,7 +191,7 @@ export default function App() {
     showScreen('home')
   }
 
-  // A Nudge event (from the inbox, the calendar or a banner)
+  // A Nudge event (from Home, the inbox or the calendar)
   function openEvent(eventId) {
     setSelectedEventId(eventId)
     showScreen('detail')
@@ -198,7 +215,7 @@ export default function App() {
     window.scrollTo(0, 0)
   }
 
-  // ADD or NOT FOR ME, from the detail screen or a banner
+  // ADD or NOT FOR ME, from the detail screen or a nudge card
   function respond(eventId, response) {
     const event = events.find((item) => item.id === eventId)
     const updatedEvent = respondToNudge(event, response)
@@ -212,7 +229,38 @@ export default function App() {
     }
 
     setSelectedEventId(eventId)
-    setLastResponse(response)
+    setConfirmation({ event: updatedEvent, response, returnTo: 'home' })
+    showScreen('confirmation')
+  }
+
+  // RESCHEDULE, from a nudge card ("home") or EventDetail ("detail")
+  function openReschedule(newEventId, returnTo) {
+    setRescheduleFor({ newEventId, returnTo })
+    showScreen('reschedule')
+  }
+
+  // Back from Reschedule (or after "Sent."), to wherever it was opened from
+  function leaveReschedule(returnTo) {
+    if (returnTo === 'detail') {
+      setSelectedEventId(rescheduleFor.newEventId)
+      showScreen('detail')
+    } else {
+      goHome()
+    }
+  }
+
+  // SEND EMAIL on the Reschedule screen: send through the email doorway,
+  // record it, and move the clashing event to the chosen slot
+  async function sendReschedule({ email, newSlot }) {
+    const sent = await sendEmail(email)
+    setSentEmails((current) => [{ ...email, id: sent.id, sentAt: getNow().toISOString() }, ...current])
+
+    const movedEvent = { ...eventToMove, startTime: newSlot.startTime, endTime: newSlot.endTime }
+    setCalendarEvents((current) =>
+      current.map((item) => (item.id === movedEvent.id ? movedEvent : item)),
+    )
+
+    setConfirmation({ event: movedEvent, response: 'sent', returnTo: rescheduleFor.returnTo })
     showScreen('confirmation')
   }
 
@@ -241,7 +289,19 @@ export default function App() {
         calendarEvents={calendarEvents}
         backLabel={activeTab}
         onRespond={(response) => respond(selectedEvent.id, response)}
+        onReschedule={() => openReschedule(selectedEvent.id, 'detail')}
         onBack={goHome}
+      />
+    )
+  } else if (screen === 'reschedule' && eventToMove) {
+    content = (
+      <RescheduleScreen
+        eventToMove={eventToMove}
+        newEvent={rescheduleNewEvent}
+        calendarEvents={calendarEvents}
+        now={now}
+        onSend={sendReschedule}
+        onBack={() => leaveReschedule(rescheduleFor.returnTo)}
       />
     )
   } else if (screen === 'calendarEvent' && selectedCalendarEvent) {
@@ -253,6 +313,7 @@ export default function App() {
       <SettingsScreen
         now={now}
         theme={theme}
+        sentEmails={sentEmails}
         backLabel={activeTab}
         onToggleTheme={toggleTheme}
         onSkip={skip}
@@ -260,9 +321,13 @@ export default function App() {
         onBack={goHome}
       />
     )
-  } else if (screen === 'confirmation' && selectedEvent) {
+  } else if (screen === 'confirmation' && confirmation) {
     content = (
-      <ConfirmationScreen event={selectedEvent} response={lastResponse} onFinish={goHome} />
+      <ConfirmationScreen
+        event={confirmation.event}
+        response={confirmation.response}
+        onFinish={() => (confirmation.response === 'sent' ? leaveReschedule(confirmation.returnTo) : goHome())}
+      />
     )
   } else {
     content = (
@@ -275,7 +340,7 @@ export default function App() {
             now={now}
             calendarEvents={calendarEvents}
             onAdd={() => respond(waitingNudge.event.id, 'add')}
-            onReschedule={() => {}} // comes in redesign part 3
+            onReschedule={() => openReschedule(waitingNudge.event.id, 'home')}
             onNotNow={ignoreNudge}
           />
         )}

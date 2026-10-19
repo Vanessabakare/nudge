@@ -3,6 +3,8 @@
 // Events already in the user's calendar, in the same shape as
 // events Nudge spots. "Dinner with Ama" deliberately overlaps
 // the networking evening (3 days from now, 6pm–8pm).
+// Calendar events may also carry organiserName / organiserEmail
+// (optional), used when Nudge drafts a reschedule email.
 // ==========================================================
 import { daysFromNow } from './dateHelpers.js'
 
@@ -29,6 +31,9 @@ export const sampleCalendar = [
     location: 'Dishoom, Kings Cross',
     isVirtual: false,
     sourceEmailId: null,
+    // Optional: who arranged it, so Nudge can offer to reschedule by email
+    organiserName: 'Ama',
+    organiserEmail: 'ama.mensah@example.com',
     status: 'added',
     nudges: [],
   },

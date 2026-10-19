@@ -4,6 +4,7 @@
 // - PROFILE: name and email (sample values for the demo)
 // - CONNECTIONS: email and calendar accounts, all coming soon
 // - APPEARANCE: the dark / light switch
+// - SENT: emails sent from Nudge (e.g. reschedule requests)
 // - DEMO CONTROLS: the demo clock's time, SKIP and RESET DEMO
 // ==========================================================
 import { formatDemoTime } from '../logic/formatDates.js'
@@ -57,6 +58,7 @@ function ActionRow({ label, onClick }) {
 export default function SettingsScreen({
   now,
   theme,
+  sentEmails,
   backLabel,
   onToggleTheme,
   onSkip,
@@ -96,6 +98,25 @@ export default function SettingsScreen({
         <Row label={theme === 'light' ? 'Light mode' : 'Dark mode'}>
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
         </Row>
+      </Section>
+
+      {/* ---- Sent emails (so the demo can show the email went) ---- */}
+      <Section title={`Sent · ${sentEmails.length}`}>
+        {sentEmails.length === 0 ? (
+          <p className="border-t border-line py-5 text-[10px] uppercase tracking-[0.3em] text-muted lg:py-6 lg:text-[12px]">
+            Nothing sent yet.
+          </p>
+        ) : (
+          sentEmails.map((email) => (
+            <div key={email.id} className="border-t border-line py-5 lg:py-6">
+              <div className="flex items-baseline justify-between gap-4 text-[10px] uppercase tracking-[0.3em] text-muted lg:text-[12px]">
+                <span className="normal-case tracking-[0.05em]">To {email.to}</span>
+                <span className="shrink-0">{formatDemoTime(email.sentAt)}</span>
+              </div>
+              <p className="mt-2 text-[13px] text-paper lg:text-[15px]">{email.subject}</p>
+            </div>
+          ))
+        )}
       </Section>
 
       {/* ---- Demo controls ---- */}
