@@ -23,6 +23,7 @@ import { withReminders } from './logic/planEventReminders.js'
 import { checkReminders } from './logic/checkReminders.js'
 import { findLatestReminder } from './logic/findLatestReminder.js'
 import { formatMonthYear } from './logic/formatDates.js'
+import { shownMonthStart } from './logic/shownMonthStart.js'
 import { isWaitingForAnswer } from './logic/statusLabel.js'
 import { findConflicts } from './logic/findConflicts.js'
 import { sendEmail } from './sources/mockEmailSender.js'
@@ -105,6 +106,9 @@ export default function App() {
   // The day picked in the month grid (null = show the grid)
   const [selectedDay, setSelectedDay] = useState(null)
 
+  // Which month the grid shows: 0 = the demo clock's month, 1 = next month...
+  const [monthOffset, setMonthOffset] = useState(0)
+
   // Nudge cards the user has closed, e.g. "event-001-nudge-1"
   const [closedNudges, setClosedNudges] = useState([])
 
@@ -149,6 +153,7 @@ export default function App() {
     setClosedReplies([])
     setActiveTab('Home')
     setSelectedDay(null)
+    setMonthOffset(0)
     setScreen('home')
     window.scrollTo(0, 0)
     startDemo()
@@ -211,7 +216,7 @@ export default function App() {
   const sidebarSubtitles = {
     Home: `${events.filter(isWaitingForAnswer).length} need your answer`,
     Inbox: `${events.length} events spotted`,
-    Calendar: formatMonthYear(now),
+    Calendar: formatMonthYear(shownMonthStart(now, monthOffset).toISOString()),
   }
   const sidebarSubtitle = sidebarSubtitles[activeTab]
 
@@ -229,6 +234,7 @@ export default function App() {
   function selectTab(tab) {
     setActiveTab(tab)
     setSelectedDay(null)
+    setMonthOffset(0)
     showScreen('home')
   }
 
@@ -541,7 +547,13 @@ export default function App() {
               onBack={() => selectDay(null)}
             />
           ) : (
-            <MonthGrid now={now} calendarEvents={calendarEvents} onSelectDay={selectDay} />
+            <MonthGrid
+              now={now}
+              monthOffset={monthOffset}
+              calendarEvents={calendarEvents}
+              onSelectDay={selectDay}
+              onChangeMonth={(change) => setMonthOffset((current) => current + change)}
+            />
           ))}
 
         <BottomNav activeTab={activeTab} onSelectTab={selectTab} />

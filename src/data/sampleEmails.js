@@ -7,7 +7,7 @@
 // snippet Gmail provides.
 //
 // Arrival times are chosen for the demo, which starts at the real
-// current time: the 4 event emails arrived earlier TODAY (always
+// current time: all 10 event emails arrived earlier TODAY (always
 // after midnight and before now), so each first nudge — 8am the
 // morning after — is still ahead, and every event starts as
 // EVENT SPOTTED. Everyday emails arrived on earlier days.
@@ -123,6 +123,164 @@ export function buildSampleEmails() {
         location: 'Main Hall, Student Union',
         isVirtual: false,
         sourceEmailId: 'email-005',
+        status: 'spotted',
+        nudges: [],
+      },
+    },
+
+    // ==========================================================
+    // More event emails, 12–38 days ahead, so the next month has
+    // things in it too. They also arrived earlier today, so they
+    // start as EVENT SPOTTED. The birthday dinner clashes with the
+    // family call in the calendar: a second clash, in the later month.
+    // ==========================================================
+
+    // ---- 15: Dentist appointment (in person, 20 minutes, 12 days) ----
+    {
+      id: 'email-015',
+      sender: 'Smile Studio Dental',
+      subject: 'Appointment confirmed — check-up and clean',
+      body:
+        'Hello,\n\nThis is to confirm your check-up and clean with Dr. Patel. ' +
+        'Please arrive 5 minutes early and bring a list of any medicines you take.\n\n' +
+        'Smile Studio Dental, 48 Upper Street, 9:40am–10:00am.\n\n' +
+        'To change your appointment, please give us 24 hours\' notice.',
+      preview: 'This is to confirm your check-up and clean with Dr. Patel. Please arrive 5 minutes early.',
+      receivedAt: earlierToday(40, 0.25), // earlier today
+      extractedEvent: {
+        id: 'event-015',
+        title: 'Dentist check-up',
+        startTime: daysFromNow(12, 9, 40),
+        endTime: daysFromNow(12, 10, 0),
+        location: 'Smile Studio Dental, 48 Upper Street',
+        isVirtual: false,
+        sourceEmailId: 'email-015',
+        status: 'spotted',
+        nudges: [],
+      },
+    },
+
+    // ---- 16: Job interview (virtual on Teams, 45 minutes, 16 days) ----
+    {
+      id: 'email-016',
+      sender: 'Northlight Studio · Talent Team',
+      subject: 'Interview invitation — Junior Product Designer',
+      body:
+        'Hi,\n\nThank you for applying for the Junior Product Designer role. ' +
+        'We would love to invite you to a 45-minute video interview with our design lead.\n\n' +
+        'Microsoft Teams, 11:00am–11:45am. The joining link is in the calendar invite.\n\n' +
+        'Best wishes,\nThe Talent Team',
+      preview: 'We would love to invite you to a 45-minute video interview with our design lead.',
+      receivedAt: earlierToday(95, 0.45), // earlier today
+      extractedEvent: {
+        id: 'event-016',
+        title: 'Interview · Junior Product Designer',
+        startTime: daysFromNow(16, 11),
+        endTime: daysFromNow(16, 11, 45),
+        location: 'Microsoft Teams',
+        isVirtual: true,
+        // A harmless sample link for JOIN
+        meetingLink: 'https://example.com/join/northlight-interview',
+        sourceEmailId: 'email-016',
+        status: 'spotted',
+        nudges: [],
+      },
+    },
+
+    // ---- 17: Birthday dinner (in person, evening, 22 days) — clashes with the family call ----
+    {
+      id: 'email-017',
+      sender: 'Zara Ahmed',
+      subject: 'Come celebrate my birthday!',
+      body:
+        'Hey you!\n\nI\'m turning 30 and doing a dinner with my favourite people. ' +
+        'Would love you to be there.\n\n' +
+        'Bancone, Covent Garden, from 7:30pm until late (we\'ll head off around 10).\n\n' +
+        'Let me know!\nZara x',
+      preview: "I'm turning 30 and doing a dinner with my favourite people. Would love you to be there.",
+      receivedAt: earlierToday(130, 0.5), // earlier today
+      extractedEvent: {
+        id: 'event-017',
+        title: "Zara's birthday dinner",
+        startTime: daysFromNow(22, 19, 30),
+        endTime: daysFromNow(22, 22),
+        location: 'Bancone, Covent Garden',
+        isVirtual: false,
+        sourceEmailId: 'email-017',
+        status: 'spotted',
+        nudges: [],
+      },
+    },
+
+    // ---- 18: Guest lecture (in person, afternoon, 27 days) ----
+    {
+      id: 'email-018',
+      sender: 'School of Computing',
+      subject: 'Guest lecture: Designing for Trust in AI',
+      body:
+        'Dear students,\n\nWe are delighted to welcome Professor Lina Osei for a guest lecture on ' +
+        'designing trustworthy AI products, followed by questions.\n\n' +
+        'Lecture Theatre B, Main Building, 2:00pm–3:30pm. All welcome.',
+      preview: 'We are delighted to welcome Professor Lina Osei for a guest lecture on trustworthy AI.',
+      receivedAt: earlierToday(190, 0.7), // earlier today
+      extractedEvent: {
+        id: 'event-018',
+        title: 'Guest lecture · Designing for Trust in AI',
+        startTime: daysFromNow(27, 14),
+        endTime: daysFromNow(27, 15, 30),
+        location: 'Lecture Theatre B, Main Building',
+        isVirtual: false,
+        sourceEmailId: 'email-018',
+        status: 'spotted',
+        nudges: [],
+      },
+    },
+
+    // ---- 19: Volunteer induction (in person, morning, 33 days) ----
+    {
+      id: 'email-019',
+      sender: 'Islington Community Food Bank',
+      subject: 'Welcome! Your volunteer induction',
+      body:
+        'Hi there,\n\nThank you so much for signing up to volunteer. Your induction covers safety, ' +
+        'how the warehouse works and meeting the team. Wear comfortable shoes.\n\n' +
+        'Community Food Bank, 9 Mill Lane, 10:00am–12:00pm.\n\nSee you soon,\nKemi',
+      preview: 'Thank you so much for signing up to volunteer. Your induction covers safety and the team.',
+      receivedAt: earlierToday(280, 0.9), // earlier today
+      extractedEvent: {
+        id: 'event-019',
+        title: 'Volunteer induction',
+        startTime: daysFromNow(33, 10),
+        endTime: daysFromNow(33, 12),
+        location: 'Community Food Bank, 9 Mill Lane',
+        isVirtual: false,
+        sourceEmailId: 'email-019',
+        status: 'spotted',
+        nudges: [],
+      },
+    },
+
+    // ---- 20: Cloud computing webinar (virtual, 1 hour, 38 days) ----
+    {
+      id: 'email-020',
+      sender: 'Cloud Skills Hub',
+      subject: 'Your place is booked: Cloud Computing for Beginners',
+      body:
+        'Thanks for registering for Cloud Computing for Beginners, a free one-hour webinar ' +
+        'covering servers, storage and serverless in plain English.\n\n' +
+        'Online, 1:00pm–2:00pm. Your joining link will work 10 minutes before the start.',
+      preview: 'Thanks for registering for Cloud Computing for Beginners, a free one-hour webinar.',
+      receivedAt: earlierToday(330, 0.95), // earlier today
+      extractedEvent: {
+        id: 'event-020',
+        title: 'Webinar · Cloud Computing for Beginners',
+        startTime: daysFromNow(38, 13),
+        endTime: daysFromNow(38, 14),
+        location: 'Online webinar',
+        isVirtual: true,
+        // A harmless sample link for JOIN
+        meetingLink: 'https://example.com/join/cloud-computing-webinar',
+        sourceEmailId: 'email-020',
         status: 'spotted',
         nudges: [],
       },

@@ -1,7 +1,8 @@
 // ==========================================================
 // MonthGrid
-// The month that contains the demo clock's "now" (phone and desktop),
-// as a grid of square days drawn with thin 1px lines.
+// A month as a grid of square days drawn with thin 1px lines
+// (phone and desktop). It opens on the demo clock's month; the
+// ‹ › arrows move to earlier or later months (monthOffset).
 // - Day numbers in the serif; past days faded; today underlined.
 // - Days with events get a small off-white dot, or a terracotta
 //   dot if two of that day's events clash.
@@ -11,18 +12,18 @@
 // Clicking a marked day calls onSelectDay with that day.
 // ==========================================================
 import { findConflicts } from '../logic/findConflicts.js'
-import { formatMonthName } from '../logic/formatDates.js'
+import { formatMonthName, formatMonthYear } from '../logic/formatDates.js'
 import { proposedPlaceholders } from '../logic/rescheduleStatus.js'
+import { shownMonthStart } from '../logic/shownMonthStart.js'
 
 const weekdayHeaders = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-// The days to draw for the month containing "now": a list of Dates,
+// The days to draw for the month starting at monthStart: a list of Dates,
 // with null for the empty squares before the 1st and after the last day,
 // so that every row runs Monday to Sunday.
-function buildMonthDays(nowIso) {
-  const now = new Date(nowIso)
-  const year = now.getFullYear()
-  const month = now.getMonth()
+function buildMonthDays(monthStart) {
+  const year = monthStart.getFullYear()
+  const month = monthStart.getMonth()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
 
   // getDay() counts from Sunday = 0; we want Monday = 0
@@ -38,8 +39,9 @@ function buildMonthDays(nowIso) {
   return days
 }
 
-export default function MonthGrid({ now, calendarEvents, onSelectDay }) {
-  const days = buildMonthDays(now)
+export default function MonthGrid({ now, monthOffset = 0, calendarEvents, onSelectDay, onChangeMonth }) {
+  const monthStart = shownMonthStart(now, monthOffset)
+  const days = buildMonthDays(monthStart)
   const todayKey = new Date(now).toDateString()
   const startOfToday = new Date(now)
   startOfToday.setHours(0, 0, 0, 0)
@@ -52,9 +54,32 @@ export default function MonthGrid({ now, calendarEvents, onSelectDay }) {
         Calendar
       </p>
 
-      {/* ---- Month name ---- */}
-      <h2 className="font-serif text-[clamp(3rem,15vw,4.5rem)] leading-none tracking-tight text-paper lg:text-[clamp(4rem,6vw,6.5rem)]">
-        {formatMonthName(now)}
+      {/* ---- The year with ‹ › to move between months, then the month name ---- */}
+      <div className="flex items-center justify-between gap-6">
+        <p className="text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">
+          {formatMonthYear(monthStart.toISOString()).split(' ')[1]}
+        </p>
+        <div className="flex shrink-0 border border-line">
+          <button
+            type="button"
+            onClick={() => onChangeMonth(-1)}
+            aria-label="Previous month"
+            className="h-11 w-11 border-r border-line font-serif text-[24px] leading-none text-paper hover:bg-paper hover:text-ink lg:h-12 lg:w-12"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            onClick={() => onChangeMonth(1)}
+            aria-label="Next month"
+            className="h-11 w-11 font-serif text-[24px] leading-none text-paper hover:bg-paper hover:text-ink lg:h-12 lg:w-12"
+          >
+            ›
+          </button>
+        </div>
+      </div>
+      <h2 className="mt-4 font-serif text-[clamp(3rem,15vw,4.5rem)] leading-none tracking-tight text-paper lg:text-[clamp(4rem,6vw,6.5rem)]">
+        {formatMonthName(monthStart.toISOString())}
       </h2>
 
       {/* ---- Weekday headers ---- */}

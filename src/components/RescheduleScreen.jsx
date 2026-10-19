@@ -48,7 +48,12 @@ export default function RescheduleScreen({
     id: `declined-${index}`,
   }))
   const busy = [...calendarEvents.filter((event) => event.id !== eventToMove.id), newEvent, ...declinedSlots]
-  const slots = findFreeSlots(busy, durationMinutes, { from: now, kind: slotKindFor(eventToMove) })
+  // Look for slots around the event's own date: from the start of its day
+  // (or from now, if that is later), so a call next month isn't moved to this week
+  const eventDay = new Date(eventToMove.startTime)
+  eventDay.setHours(0, 0, 0, 0)
+  const searchFrom = new Date(Math.max(eventDay, new Date(now))).toISOString()
+  const slots = findFreeSlots(busy, durationMinutes, { from: searchFrom, kind: slotKindFor(eventToMove) })
 
   // ---- Which slot is chosen, and the email draft ----
   const [chosenIndex, setChosenIndex] = useState(0)
