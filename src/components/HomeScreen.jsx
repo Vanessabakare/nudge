@@ -4,6 +4,7 @@
 // - a top bar: the small "Nudge" wordmark and a round profile
 //   button (the user's initial) that opens Settings
 // - a greeting for the time of day, and today's date, large
+// - TODAY: the rest of today's events (or "Nothing else today")
 // - NEXT UP: the next event in the calendar
 // - NEEDS YOUR ANSWER: events still waiting for ADD or NOT FOR ME
 // - AWAITING REPLIES: reschedule requests out with other people
@@ -75,6 +76,15 @@ export default function HomeScreen({
   onShowInbox,
   onOpenSettings,
 }) {
+  // ---- The rest of today: events today that haven't finished yet ----
+  const today = calendarEvents
+    .filter(
+      (event) =>
+        new Date(event.startTime).toDateString() === new Date(now).toDateString() &&
+        new Date(event.endTime) > new Date(now),
+    )
+    .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+
   // ---- The next calendar event that hasn't started yet ----
   const nextUp = calendarEvents
     .filter((event) => new Date(event.startTime) > new Date(now))
@@ -117,8 +127,34 @@ export default function HomeScreen({
         {formatLongDate(now)}
       </h1>
 
-      {/* ---- Next up ---- */}
+      {/* ---- Today ---- */}
       <section className="mt-16 lg:mt-20">
+        <SectionHeading>Today</SectionHeading>
+        {today.length > 0 ? (
+          <ol className="mt-6 border-b border-line">
+            {today.map((event, position) => (
+              <EventRow
+                key={event.id}
+                position={position}
+                timeLine={formatTimeRange(event.startTime, event.endTime)}
+                title={event.title}
+                onClick={() => onOpenCalendarEvent(event)}
+              >
+                <p className="mt-1 text-[12px] uppercase leading-relaxed tracking-[0.3em] text-muted lg:text-[12px]">
+                  {event.location}
+                </p>
+              </EventRow>
+            ))}
+          </ol>
+        ) : (
+          <p className="mt-6 text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[13px]">
+            Nothing else today
+          </p>
+        )}
+      </section>
+
+      {/* ---- Next up ---- */}
+      <section className="mt-16">
         <SectionHeading>Next up</SectionHeading>
         {nextUp ? (
           <ol className="mt-6 border-b border-line">

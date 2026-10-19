@@ -19,6 +19,9 @@ import { checkNudges } from './logic/checkNudges.js'
 import { respondToNudge } from './logic/respondToNudge.js'
 import { findLatestWaitingNudge } from './logic/findLatestWaitingNudge.js'
 import { findNextNudgeTime } from './logic/findNextNudgeTime.js'
+import { withReminders } from './logic/planEventReminders.js'
+import { checkReminders } from './logic/checkReminders.js'
+import { findLatestReminder } from './logic/findLatestReminder.js'
 import { formatMonthYear } from './logic/formatDates.js'
 import { isWaitingForAnswer } from './logic/statusLabel.js'
 import { findConflicts } from './logic/findConflicts.js'
@@ -33,6 +36,7 @@ import OnboardingScreen from './components/OnboardingScreen.jsx'
 import DesktopSidebar from './components/DesktopSidebar.jsx'
 import NudgeCard from './components/NudgeCard.jsx'
 import ReplyCard from './components/ReplyCard.jsx'
+import ReminderCard from './components/ReminderCard.jsx'
 import SettingsScreen from './components/SettingsScreen.jsx'
 import RescheduleScreen from './components/RescheduleScreen.jsx'
 import HomeScreen from './components/HomeScreen.jsx'
@@ -109,8 +113,8 @@ export default function App() {
 
   // ---- Start (or restart) the demo ----
   // Starts the demo clock at the real current time, loads the emails
-  // (which arrived earlier today, so no nudge is due yet), and plans
-  // each event's nudges.
+  // (which arrived earlier today, so no nudge is due yet), plans each
+  // spotted event's nudges, and plans reminders for the calendar.
   function startDemo() {
     getEmails().then((loadedEmails) => {
       startAt(new Date().toISOString())
@@ -123,6 +127,7 @@ export default function App() {
       setEmails(loadedEmails)
       setNow(demoNow)
       setEvents(checkNudges(plannedEvents, demoNow))
+      setCalendarEvents(buildSampleCalendar().map((event) => withReminders(event, demoNow)))
     })
   }
 
@@ -149,11 +154,12 @@ export default function App() {
     startDemo()
   }
 
-  // ---- Keep the clock ticking, and send nudges as they fall due ----
+  // ---- Keep the clock ticking, and send nudges and reminders as they fall due ----
   function refreshClock() {
     const newNow = getNow().toISOString()
     setNow(newNow)
     setEvents((current) => checkNudges(current, newNow))
+    setCalendarEvents((current) => checkReminders(current, newNow))
   }
 
   useEffect(() => {
@@ -167,9 +173,9 @@ export default function App() {
   }
 
   // SKIP TO NEXT NUDGE: move the clock to one minute after the next
-  // nudge is due (does nothing if no nudges are left)
+  // nudge or reminder is due (does nothing if none are left)
   function skipToNextNudge() {
-    const nextTime = findNextNudgeTime(events, now)
+    const nextTime = findNextNudgeTime(events, calendarEvents, now)
     if (!nextTime) return
     const hoursAway = (new Date(nextTime) - getNow()) / (60 * 60 * 1000)
     skip(hoursAway + 1 / 60)
@@ -183,6 +189,9 @@ export default function App() {
     (calendarEvent) => calendarEvent.id === selectedCalendarEventId,
   )
   const waitingNudge = findLatestWaitingNudge(events, closedNudges)
+
+  // A reminder about a calendar event that has fired and not been closed
+  const reminderToShow = findLatestReminder(calendarEvents, now)
 
   // While rescheduling: the new event, and the calendar event it clashes with
   const rescheduleNewEvent = rescheduleFor && events.find((event) => event.id === rescheduleFor.newEventId)
@@ -257,7 +266,8 @@ export default function App() {
       current.map((item) => (item.id === updatedEvent.id ? updatedEvent : item)),
     )
     if (response === 'add') {
-      setCalendarEvents((current) => [...current, updatedEvent])
+      // Into the calendar, with its reminders (day before, morning of, soon)
+      setCalendarEvents((current) => [...current, withReminders(updatedEvent, getNow().toISOString())])
     }
 
     setSelectedEventId(eventId)
@@ -346,11 +356,15 @@ export default function App() {
   // The placeholder and the clash disappear with the reschedule state.
   function updateCalendar(calendarEvent) {
     const { reschedule, ...eventWithoutReschedule } = calendarEvent
-    const movedEvent = {
-      ...eventWithoutReschedule,
-      startTime: reschedule.proposedSlot.startTime,
-      endTime: reschedule.proposedSlot.endTime,
-    }
+    // Moved, with fresh reminders for its new time
+    const movedEvent = withReminders(
+      {
+        ...eventWithoutReschedule,
+        startTime: reschedule.proposedSlot.startTime,
+        endTime: reschedule.proposedSlot.endTime,
+      },
+      getNow().toISOString(),
+    )
     replaceCalendarEvent(movedEvent)
     setConfirmation({ event: movedEvent, response: 'updated', returnTo: 'home' })
     showScreen('confirmation')
@@ -361,6 +375,17 @@ export default function App() {
   function pickAnotherTime(calendarEvent) {
     setClosedReplies((current) => [...current, calendarEvent.reschedule.replyEmailId])
     openReschedule(calendarEvent.reschedule.forEventId, 'home')
+  }
+
+  // OK on a reminder card: mark that reminder as seen
+  function dismissReminder() {
+    const { event, reminder } = reminderToShow
+    replaceCalendarEvent({
+      ...event,
+      reminders: event.reminders.map((item) =>
+        item.type === reminder.type ? { ...item, dismissed: true } : item,
+      ),
+    })
   }
 
   // NOT NOW on a reply card: close it (the event detail still offers the next step)
@@ -438,7 +463,7 @@ export default function App() {
         onSkipToNextNudge={skipToNextNudge}
         awaitingReplyFrom={awaitingReply?.reschedule.contactName}
         onSimulateReply={simulateReply}
-        hasNextNudge={Boolean(findNextNudgeTime(events, now))}
+        hasNextNudge={Boolean(findNextNudgeTime(events, calendarEvents, now))}
         onReset={resetDemo}
         onBack={goHome}
       />
@@ -454,7 +479,8 @@ export default function App() {
   } else {
     content = (
       <>
-        {/* A reply from someone comes first; otherwise the latest nudge */}
+        {/* One card at a time: a reply from someone first, then a nudge
+            to add an event, then a reminder about one already added */}
         {replyToShow && (
           <ReplyCard
             key={replyToShow.reschedule.replyEmailId}
@@ -462,6 +488,15 @@ export default function App() {
             onUpdate={() => updateCalendar(replyToShow)}
             onPickAnother={() => pickAnotherTime(replyToShow)}
             onNotNow={closeReplyCard}
+          />
+        )}
+
+        {!replyToShow && !waitingNudge && reminderToShow && (
+          <ReminderCard
+            key={`${reminderToShow.event.id}-${reminderToShow.reminder.type}`}
+            event={reminderToShow.event}
+            reminder={reminderToShow.reminder}
+            onOk={dismissReminder}
           />
         )}
 

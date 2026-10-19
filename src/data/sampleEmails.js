@@ -60,6 +60,8 @@ export function buildSampleEmails() {
         endTime: daysFromNow(5, 12),
         location: 'Zoom',
         isVirtual: true,
+        // Optional: where to join a virtual event (a harmless sample link)
+        meetingLink: 'https://example.com/join/presenting-with-confidence',
         sourceEmailId: 'email-002',
         status: 'spotted',
         nudges: [],

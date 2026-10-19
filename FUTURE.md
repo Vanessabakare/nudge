@@ -11,6 +11,7 @@ This file says exactly how to replace each one.
 | Sending email | `src/sources/mockEmailSender.js` | `gmailEmailSender.js`, `outlookEmailSender.js` |
 | Calendar | sample data held in `App` state | `src/calendar/localCalendar.js` → `googleCalendar.js`, `outlookCalendar.js` |
 | Time and nudges | `src/clock/demoClock.js` + `checkNudges` | EventBridge Scheduler |
+| Event reminders | `planEventReminders` + `checkReminders` on the demo clock | EventBridge Scheduler → push notification or email |
 | Event details from email | hand-written `extractedEvent` in sample data | Amazon Bedrock extraction |
 | Reschedule email text | `src/logic/draftRescheduleEmail.js` (template) | Amazon Bedrock drafting |
 | Replies to a reschedule | `src/sources/mockReplySimulator.js` + `src/logic/detectReplyOutcome.js` (keywords) | watch the sent email's thread + Bedrock |
@@ -138,6 +139,23 @@ Replaces `demoClock.js` and the 30-second `checkNudges` tick.
 - One more schedule at the event's start time marks it `expired` if unanswered
   (this is what `checkNudges` does today).
 - `demoClock.getNow()` becomes simply `new Date()`; remove the demo controls from Settings.
+
+**Event reminders** (for events already in the calendar) work the same way.
+In the demo, `planEventReminders` stores `reminders` on each calendar event and
+`checkReminders` fires them on the clock tick. In the real app:
+
+- When an event lands in the calendar (ADD, an existing calendar event being
+  synced in, or UPDATE CALENDAR moving it), run `planEventReminders` on the
+  server and create **one EventBridge Scheduler one-time schedule per reminder**
+  ("dayBefore" 7pm, "morningOf" 8am, "soon" 1 hour / 10 minutes before), with
+  the user's time zone and "delete after completion".
+- The target Lambda marks the reminder `sentAt` and delivers it as a **push
+  notification** (Web Push now, Amazon SNS for mobile later) or, if the user
+  prefers, a short **email** through the user's own sender doorway.
+- If the event moves or is deleted, delete its schedules and plan new ones.
+- Virtual events: store the real meeting link from the calendar (Google Meet /
+  Teams / Zoom) in `meetingLink`, so JOIN on the "starting in 10 minutes"
+  reminder opens it directly.
 
 ## 7. AI with Amazon Bedrock
 
