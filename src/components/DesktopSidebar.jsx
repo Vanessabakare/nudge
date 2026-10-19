@@ -4,7 +4,9 @@
 // serif title, a small subtitle, and the navigation as a
 // numbered list. On desktop it replaces the bottom nav; on
 // phones it is hidden entirely.
+// At the bottom: a small version of the dark / light switch.
 // ==========================================================
+import ThemeToggle from './ThemeToggle.jsx'
 
 const tabs = ['Home', 'Inbox', 'Calendar']
 
@@ -13,9 +15,9 @@ function formatIndex(position) {
   return String(position + 1).padStart(2, '0')
 }
 
-export default function DesktopSidebar({ activeTab, subtitle, onSelectTab }) {
+export default function DesktopSidebar({ activeTab, subtitle, theme, onSelectTab, onToggleTheme }) {
   return (
-    <aside className="hidden lg:sticky lg:top-9 lg:block lg:h-[calc(100vh-2.25rem)] lg:w-[26%] lg:shrink-0 lg:border-r lg:border-line lg:px-10 lg:pt-20 xl:px-14">
+    <aside className="hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-[26%] lg:shrink-0 lg:flex-col lg:border-r lg:border-line lg:px-10 lg:pt-20 lg:pb-10 xl:px-14">
       {/* ---- Title and subtitle ---- */}
       <h1 className="font-serif text-[clamp(2.75rem,4.2vw,5rem)] leading-none tracking-tight text-paper">
         {activeTab}
@@ -46,6 +48,14 @@ export default function DesktopSidebar({ activeTab, subtitle, onSelectTab }) {
           })}
         </ol>
       </nav>
+
+      {/* ---- Small dark / light switch, pinned to the bottom ---- */}
+      <div className="mt-auto flex items-center gap-4">
+        <ThemeToggle theme={theme} onToggle={onToggleTheme} size="small" />
+        <span className="text-[12px] uppercase tracking-[0.35em] text-muted">
+          {theme === 'light' ? 'Light' : 'Dark'}
+        </span>
+      </div>
     </aside>
   )
 }

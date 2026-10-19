@@ -2,7 +2,7 @@
 // HomeScreen
 // The first screen after the splash. From top to bottom:
 // - a top bar: the small "Nudge" wordmark and a round profile
-//   button (it will open Settings in a later step)
+//   button that opens Settings
 // - a greeting for the time of day, and today's date, large
 // - NEXT UP: the next event in the calendar
 // - NEEDS YOUR ANSWER: events still waiting for ADD or NOT FOR ME
@@ -65,6 +65,7 @@ export default function HomeScreen({
   onOpenEvent,
   onOpenCalendarEvent,
   onShowInbox,
+  onOpenSettings,
 }) {
   // ---- The next calendar event that hasn't started yet ----
   const nextUp = calendarEvents
@@ -88,6 +89,7 @@ export default function HomeScreen({
         <p className="font-serif text-[22px] leading-none text-paper lg:text-[26px]">Nudge</p>
         <button
           type="button"
+          onClick={onOpenSettings}
           aria-label="Profile and settings"
           className="flex h-9 w-9 items-center justify-center rounded-full border border-paper/50 text-[12px] uppercase text-paper hover:bg-paper hover:text-ink lg:h-10 lg:w-10 lg:text-[13px]"
         >

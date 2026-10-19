@@ -7,7 +7,9 @@
    --font-serif ->  font-serif
    ========================================================== */
 @theme {
-  /* Dark palette (for now): near-black background, off-white text */
+  /* Dark palette (the default): near-black background, off-white text.
+     The light palette further down swaps these same tokens.
+     ink = background, paper = main text */
   --color-ink: #0e0d0c;
   --color-paper: #f2eee7;
   --color-muted: #8a857d;
@@ -15,6 +17,9 @@
 
   /* The single accent: warm terracotta. Use rarely. */
   --color-accent: #c4673f;
+
+  /* The dimming layer behind the nudge card (colour with see-through) */
+  --color-scrim: rgb(14 13 12 / 0.6);
 
   /* Two typefaces with strict roles */
   --font-serif: "Bodoni Moda", "Playfair Display", Georgia, serif;
@@ -25,17 +30,18 @@
   --animate-splash-out: fade-out 0.6s ease 2.4s both;
   --animate-fade-in: fade-in 0.8s ease both;
   --animate-confirm-out: fade-out 0.5s ease 1.6s both;
-  --animate-slide-down: slide-down 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-overlay-in: fade-in 0.4s ease both;
+  --animate-card-in: card-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
 
-  /* The nudge banner drops gently in from the top */
-  @keyframes slide-down {
+  /* The nudge card fades in while growing very slightly */
+  @keyframes card-in {
     from {
       opacity: 0;
-      transform: translateY(-100%);
+      transform: scale(0.96);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      transform: scale(1);
     }
   }
 
@@ -69,6 +75,24 @@
     from { opacity: 0; }
     to { opacity: 1; }
   }
+}
+
+/* ==========================================================
+   Light palette — warm cream background, near-black text.
+   Switched on by data-theme="light" on the <html> element.
+   ========================================================== */
+:root[data-theme="light"] {
+  --color-ink: #f6f2ec;
+  --color-paper: #1a1816;
+  --color-muted: #7a7268;
+  --color-line: #ddd5ca;
+  --color-accent: #b5582f;
+  --color-scrim: rgb(26 24 22 / 0.28);
+  color-scheme: light;
+}
+
+:root {
+  color-scheme: dark;
 }
 
 /* ==========================================================

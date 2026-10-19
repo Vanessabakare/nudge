@@ -2,9 +2,9 @@
 // App
 // Holds the app's shared state (emails, spotted events, the
 // calendar and the current demo time) and decides which screen
-// to show: splash -> home (INBOX or CALENDAR) <-> detail screens.
-// A nudge banner slides in over the home screens when a nudge
-// is waiting for an answer.
+// to show: splash -> home (HOME, INBOX or CALENDAR tab) <-> detail
+// screens and Settings. When a nudge is waiting for an answer, a
+// nudge card appears over the home screens.
 //
 // Phone: one column, bottom nav, detail screens fill the screen.
 // Desktop (1024px+): a left column with title and numbered nav;
@@ -20,10 +20,12 @@ import { respondToNudge } from './logic/respondToNudge.js'
 import { findLatestWaitingNudge } from './logic/findLatestWaitingNudge.js'
 import { formatMonthYear } from './logic/formatDates.js'
 import { isWaitingForAnswer } from './logic/statusLabel.js'
+import { applyTheme, getSavedTheme, saveTheme } from './settings/theme.js'
+import { clearSavedDemoState, takeResetRequestFromUrl } from './settings/demoState.js'
 import SplashScreen from './components/SplashScreen.jsx'
-import DemoControl from './components/DemoControl.jsx'
 import DesktopSidebar from './components/DesktopSidebar.jsx'
-import NudgeBanner from './components/NudgeBanner.jsx'
+import NudgeCard from './components/NudgeCard.jsx'
+import SettingsScreen from './components/SettingsScreen.jsx'
 import HomeScreen from './components/HomeScreen.jsx'
 import InboxList from './components/InboxList.jsx'
 import CalendarView from './components/CalendarView.jsx'
@@ -53,10 +55,22 @@ export default function App() {
   const [calendarEvents, setCalendarEvents] = useState(sampleCalendar)
   const [now, setNow] = useState(() => getNow().toISOString())
 
+  // ---- Dark or light mode (remembered in the browser) ----
+  const [theme, setTheme] = useState(getSavedTheme)
+
+  useEffect(() => {
+    applyTheme(theme)
+    saveTheme(theme)
+  }, [theme])
+
+  function toggleTheme() {
+    setTheme((current) => (current === 'light' ? 'dark' : 'light'))
+  }
+
   // ---- Which screen is showing ----
   const [showSplash, setShowSplash] = useState(true)
   const [activeTab, setActiveTab] = useState('Home') // "Home" | "Inbox" | "Calendar"
-  const [screen, setScreen] = useState('home') // "home" | "detail" | "calendarEvent" | "confirmation"
+  const [screen, setScreen] = useState('home') // "home" | "detail" | "calendarEvent" | "confirmation" | "settings"
   const [selectedEventId, setSelectedEventId] = useState(null)
   const [selectedCalendarEventId, setSelectedCalendarEventId] = useState(null)
   const [lastResponse, setLastResponse] = useState(null) // "add" | "dismiss"
@@ -64,8 +78,8 @@ export default function App() {
   // The day picked in the month grid (null = show the grid)
   const [selectedDay, setSelectedDay] = useState(null)
 
-  // Nudge banners the user has closed, e.g. "event-001-nudge-1"
-  const [closedBanners, setClosedBanners] = useState([])
+  // Nudge cards the user has closed, e.g. "event-001-nudge-1"
+  const [closedNudges, setClosedNudges] = useState([])
 
   // ---- Start (or restart) the demo ----
   // Loads the emails, starts the demo clock just after the newest
@@ -88,14 +102,20 @@ export default function App() {
     })
   }
 
+  // On first load, also honour ?reset in the address
   useEffect(() => {
+    if (takeResetRequestFromUrl()) {
+      clearSavedDemoState()
+    }
     startDemo()
   }, [])
 
-  // RESET in the demo strip: back to the very start, without the splash
+  // RESET DEMO in Settings: back to the very start, without the splash.
+  // The dark/light choice is a preference, so it is kept.
   function resetDemo() {
+    clearSavedDemoState()
     setCalendarEvents(sampleCalendar)
-    setClosedBanners([])
+    setClosedNudges([])
     setActiveTab('Home')
     setSelectedDay(null)
     setScreen('home')
@@ -127,7 +147,7 @@ export default function App() {
   const selectedCalendarEvent = calendarEvents.find(
     (calendarEvent) => calendarEvent.id === selectedCalendarEventId,
   )
-  const waitingNudge = findLatestWaitingNudge(events, closedBanners)
+  const waitingNudge = findLatestWaitingNudge(events, closedNudges)
 
   // Desktop left column subtitle, e.g. "4 NEED YOUR ANSWER", "4 EVENTS SPOTTED", "OCTOBER 2026"
   const sidebarSubtitles = {
@@ -196,16 +216,15 @@ export default function App() {
     showScreen('confirmation')
   }
 
-  // Closes the current banner. NOT NOW also counts the nudge as ignored.
-  function closeBanner(isIgnored) {
-    setClosedBanners((current) => [...current, waitingNudge.key])
-    if (isIgnored) {
-      setEvents((current) =>
-        current.map((item) =>
-          item.id === waitingNudge.event.id ? respondToNudge(item, 'ignore') : item,
-        ),
-      )
-    }
+  // NOT NOW on the nudge card (or a tap outside it): close the card,
+  // and count the nudge as ignored
+  function ignoreNudge() {
+    setClosedNudges((current) => [...current, waitingNudge.key])
+    setEvents((current) =>
+      current.map((item) =>
+        item.id === waitingNudge.event.id ? respondToNudge(item, 'ignore') : item,
+      ),
+    )
   }
 
   // ---- Screens ----
@@ -229,6 +248,18 @@ export default function App() {
     content = (
       <CalendarEventDetail event={selectedCalendarEvent} backLabel={activeTab} onBack={goHome} />
     )
+  } else if (screen === 'settings') {
+    content = (
+      <SettingsScreen
+        now={now}
+        theme={theme}
+        backLabel={activeTab}
+        onToggleTheme={toggleTheme}
+        onSkip={skip}
+        onReset={resetDemo}
+        onBack={goHome}
+      />
+    )
   } else if (screen === 'confirmation' && selectedEvent) {
     content = (
       <ConfirmationScreen event={selectedEvent} response={lastResponse} onFinish={goHome} />
@@ -237,18 +268,15 @@ export default function App() {
     content = (
       <>
         {waitingNudge && (
-          <NudgeBanner
+          <NudgeCard
             key={waitingNudge.key}
             event={waitingNudge.event}
             nudgeNumber={waitingNudge.nudgeNumber}
             now={now}
             calendarEvents={calendarEvents}
             onAdd={() => respond(waitingNudge.event.id, 'add')}
-            onNotNow={() => closeBanner(true)}
-            onView={() => {
-              closeBanner(false)
-              openEvent(waitingNudge.event.id)
-            }}
+            onReschedule={() => {}} // comes in redesign part 3
+            onNotNow={ignoreNudge}
           />
         )}
 
@@ -261,6 +289,7 @@ export default function App() {
             onOpenEvent={openEvent}
             onOpenCalendarEvent={openCalendarEvent}
             onShowInbox={() => selectTab('Inbox')}
+            onOpenSettings={() => showScreen('settings')}
           />
         )}
 
@@ -286,14 +315,16 @@ export default function App() {
     )
   }
 
-  // The demo control sits above every screen; content starts below it
   return (
-    <>
-      <DemoControl now={now} onSkip={skip} onReset={resetDemo} />
-      <div className="pt-9 lg:flex">
-        <DesktopSidebar activeTab={activeTab} subtitle={sidebarSubtitle} onSelectTab={selectTab} />
-        <div className="lg:min-w-0 lg:flex-1">{content}</div>
-      </div>
-    </>
+    <div className="lg:flex">
+      <DesktopSidebar
+        activeTab={activeTab}
+        subtitle={sidebarSubtitle}
+        theme={theme}
+        onSelectTab={selectTab}
+        onToggleTheme={toggleTheme}
+      />
+      <div className="lg:min-w-0 lg:flex-1">{content}</div>
+    </div>
   )
 }

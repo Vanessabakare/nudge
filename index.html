@@ -6,6 +6,19 @@
     <meta name="theme-color" content="#0e0d0c" />
     <title>Nudge</title>
 
+    <!-- Apply the saved dark/light choice before the page draws, so it
+         never flashes the wrong colours. Same key as src/settings/theme.js -->
+    <script>
+      try {
+        if (localStorage.getItem('nudge-theme') === 'light') {
+          document.documentElement.dataset.theme = 'light'
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f6f2ec')
+        }
+      } catch (error) {
+        // Storage blocked: stay with the default dark theme
+      }
+    </script>
+
     <!-- Fonts: Bodoni Moda (serif, big moments) and Jost (thin sans, everything else) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
