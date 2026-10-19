@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+/* ==========================================================
+   Theme — colours, fonts and animations for the whole app.
+   Each line here becomes a Tailwind class, e.g.
+   --color-ink  ->  bg-ink / text-ink
+   --font-serif ->  font-serif
+   ========================================================== */
+@theme {
+  /* Dark palette (for now): near-black background, off-white text */
+  --color-ink: #0e0d0c;
+  --color-paper: #f2eee7;
+  --color-muted: #8a857d;
+  --color-line: #2a2826;
+
+  /* The single accent: warm terracotta. Use rarely. */
+  --color-accent: #c4673f;
+
+  /* Two typefaces with strict roles */
+  --font-serif: "Bodoni Moda", "Playfair Display", Georgia, serif;
+  --font-sans: "Jost", "Helvetica Neue", Arial, sans-serif;
+
+  /* Animations used by the splash and home screens */
+  --animate-nudge-in: nudge-in 1.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-splash-out: fade-out 0.6s ease 2.4s both;
+  --animate-fade-in: fade-in 0.8s ease both;
+
+  /* The wordmark glides in from the left and lands a little
+     off-line (slightly low and tilted), pauses, then gets a
+     small nudge into its proper place. */
+  @keyframes nudge-in {
+    0% {
+      opacity: 0;
+      transform: translateX(-60vw) translateY(0.06em) rotate(-2.5deg);
+    }
+    50% {
+      opacity: 1;
+      transform: translateX(0.08em) translateY(0.06em) rotate(-2.5deg);
+    }
+    70% {
+      transform: translateX(0.08em) translateY(0.06em) rotate(-2.5deg);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0) translateY(0) rotate(0deg);
+    }
+  }
+
+  @keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+/* ==========================================================
+   Base page styles
+   ========================================================== */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-sans);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Respect people who turn off motion in their device settings */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+  }
+}
