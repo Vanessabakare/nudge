@@ -1,10 +1,12 @@
 // ==========================================================
 // App
-// Shows the splash screen first, then the home screen.
+// Shows the splash screen first, then the inbox with the
+// bottom navigation.
 // ==========================================================
 import { useState } from 'react'
 import SplashScreen from './components/SplashScreen.jsx'
-import HomeScreen from './components/HomeScreen.jsx'
+import InboxList from './components/InboxList.jsx'
+import BottomNav from './components/BottomNav.jsx'
 
 export default function App() {
   // ---- Is the splash still showing? ----
@@ -14,5 +16,10 @@ export default function App() {
   if (showSplash) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />
   }
-  return <HomeScreen />
+  return (
+    <>
+      <InboxList />
+      <BottomNav activeTab="Inbox" />
+    </>
+  )
 }
