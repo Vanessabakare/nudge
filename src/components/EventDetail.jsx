@@ -17,7 +17,14 @@ function conflictMessage(conflict) {
 
 export default function EventDetail({ event, email, calendarEvents, onRespond, onBack }) {
   const conflicts = findConflicts(event, calendarEvents)
-  const isAnswered = event.status === 'added' || event.status === 'dismissed'
+  const isAnswered = ['added', 'dismissed', 'expired'].includes(event.status)
+
+  // The quiet line shown instead of the buttons once settled
+  const settledMessages = {
+    added: 'In your calendar',
+    dismissed: 'Not for you — no more nudges',
+    expired: 'No answer — Nudge has let this one go',
+  }
 
   // ---- Layout ----
   return (
@@ -68,7 +75,7 @@ export default function EventDetail({ event, email, calendarEvents, onRespond, o
       {/* ---- The two choices, or what was decided ---- */}
       {isAnswered ? (
         <p className="mt-14 border-t border-line pt-6 text-[11px] uppercase tracking-[0.35em] text-muted">
-          {event.status === 'added' ? 'In your calendar' : 'Not for you — no more nudges'}
+          {settledMessages[event.status]}
         </p>
       ) : (
         <div className="mt-14 flex border-y border-line">

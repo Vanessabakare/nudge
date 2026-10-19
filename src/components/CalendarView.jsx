@@ -21,11 +21,11 @@ function dayKey(isoString) {
   return new Date(isoString).toDateString()
 }
 
-// Picks the events in the next 14 days (from the start of today),
+// Picks the events in the next 14 days (from the start of the demo "today"),
 // sorts them by time, and groups them by day:
 // [{ key, events: [...] }, ...]
-function groupByDay(calendarEvents) {
-  const windowStart = new Date()
+function groupByDay(calendarEvents, now) {
+  const windowStart = new Date(now)
   windowStart.setHours(0, 0, 0, 0)
   const windowEnd = new Date(windowStart)
   windowEnd.setDate(windowEnd.getDate() + daysToShow)
@@ -50,8 +50,8 @@ function groupByDay(calendarEvents) {
   return days
 }
 
-export default function CalendarView({ calendarEvents, onOpenEvent }) {
-  const days = groupByDay(calendarEvents)
+export default function CalendarView({ calendarEvents, now, onOpenEvent }) {
+  const days = groupByDay(calendarEvents, now)
 
   // ---- Layout ----
   return (

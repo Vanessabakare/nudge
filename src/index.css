@@ -25,6 +25,19 @@
   --animate-splash-out: fade-out 0.6s ease 2.4s both;
   --animate-fade-in: fade-in 0.8s ease both;
   --animate-confirm-out: fade-out 0.5s ease 1.6s both;
+  --animate-slide-down: slide-down 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  /* The nudge banner drops gently in from the top */
+  @keyframes slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
   /* The wordmark glides in from the left and lands a little
      off-line (slightly low and tilted), pauses, then gets a

@@ -15,6 +15,10 @@ function statusLabel(event) {
   if (event.status === 'added') return 'Added'
   if (event.status === 'dismissed') return 'Dismissed'
   if (event.status === 'expired') return 'Expired'
+  if (event.status === 'nudged') {
+    const sentCount = event.nudges.filter((nudge) => nudge.sentAt).length
+    return `Nudge ${sentCount} of ${event.nudges.length}`
+  }
   return 'Event spotted'
 }
 

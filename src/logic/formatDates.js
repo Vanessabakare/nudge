@@ -28,6 +28,37 @@ function timeParts(isoString) {
   return { clock, period }
 }
 
+// -> "2:15PM"
+export function formatClock(isoString) {
+  const { clock, period } = timeParts(isoString)
+  return `${clock}${period}`
+}
+
+// -> "WED 8AM" (used under each nudge in the tracker)
+export function formatShortDayTime(isoString) {
+  const date = new Date(isoString)
+  const weekday = date.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase()
+  return `${weekday} ${formatClock(isoString)}`
+}
+
+// -> "TUE 20 OCT · 2:15PM" (used by the demo clock)
+export function formatDemoTime(isoString) {
+  const date = new Date(isoString)
+  const weekday = date.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase()
+  return `${weekday} ${formatDayMonth(isoString)} · ${formatClock(isoString)}`
+}
+
+// How long from now until a moment -> "IN 40 MINUTES", "IN 5 HOURS", "IN 2 DAYS"
+export function formatTimeUntil(nowIso, targetIso) {
+  const minutes = Math.round((new Date(targetIso) - new Date(nowIso)) / 60000)
+  if (minutes <= 0) return 'NOW'
+
+  const plural = (count, word) => `IN ${count} ${word}${count === 1 ? '' : 'S'}`
+  if (minutes < 60) return plural(minutes, 'MINUTE')
+  if (minutes < 48 * 60) return plural(Math.round(minutes / 60), 'HOUR')
+  return plural(Math.round(minutes / (24 * 60)), 'DAY')
+}
+
 // Start and end -> "7–9PM", or "11AM–1PM" when it crosses midday
 export function formatTimeRange(startIso, endIso) {
   const start = timeParts(startIso)
