@@ -2,8 +2,9 @@
 // ConfirmationScreen
 // A brief, calm "done" moment, e.g. "Added." in the serif with
 // a short line beneath. Fades out and calls onFinish.
-// response: "add" | "dismiss" | "sent" (an email was sent and
-// the event moved to its new time).
+// response: "add" | "dismiss" | "sent" (a reschedule request went
+// out; nothing has moved yet) | "updated" (the event moved after
+// the other person agreed).
 // ==========================================================
 import { useEffect } from 'react'
 import { formatDayMonth, formatShortDate, formatTimeRange } from '../logic/formatDates.js'
@@ -18,8 +19,12 @@ function wordingFor(event, response) {
     return { heading: 'Added.', line: `${event.title} · ${formatDayMonth(event.startTime)}` }
   }
   if (response === 'sent') {
+    const name = event.reschedule?.contactName || 'they'
+    return { heading: 'Sent.', line: `We'll let you know when ${name} replies.` }
+  }
+  if (response === 'updated') {
     const newTime = `${formatShortDate(event.startTime)} · ${formatTimeRange(event.startTime, event.endTime)}`
-    return { heading: 'Sent.', line: `${event.title} moved to ${newTime}` }
+    return { heading: 'Updated.', line: `${event.title} moved to ${newTime}` }
   }
   return { heading: 'Noted.', line: 'No more nudges about this one' }
 }

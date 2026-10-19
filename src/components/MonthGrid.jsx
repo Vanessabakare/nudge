@@ -6,10 +6,13 @@
 // - Days with events get a small off-white dot, or a terracotta
 //   dot if two of that day's events clash.
 // - Days with more than one event show the count in the corner.
+// - A day holding only a proposed (not yet agreed) time gets a
+//   hollow dashed marker instead of a dot.
 // Clicking a marked day calls onSelectDay with that day.
 // ==========================================================
 import { findConflicts } from '../logic/findConflicts.js'
 import { formatMonthName } from '../logic/formatDates.js'
+import { proposedPlaceholders } from '../logic/rescheduleStatus.js'
 
 const weekdayHeaders = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -74,6 +77,9 @@ export default function MonthGrid({ now, calendarEvents, onSelectDay }) {
           const dayEvents = calendarEvents.filter(
             (event) => new Date(event.startTime).toDateString() === date.toDateString(),
           )
+          const hasProposed = proposedPlaceholders(calendarEvents).some(
+            (placeholder) => new Date(placeholder.startTime).toDateString() === date.toDateString(),
+          )
           const hasEvents = dayEvents.length > 0
           const hasClash = dayEvents.some((event) => findConflicts(event, dayEvents).length > 0)
           const isToday = date.toDateString() === todayKey
@@ -99,6 +105,11 @@ export default function MonthGrid({ now, calendarEvents, onSelectDay }) {
                 </span>
               )}
 
+              {/* Hollow dashed marker: a proposed time, not yet agreed */}
+              {!hasEvents && hasProposed && (
+                <span className="absolute bottom-2 left-2 h-1.5 w-1.5 border border-dashed border-paper lg:bottom-4 lg:left-4 lg:h-2 lg:w-2" />
+              )}
+
               {/* Dot: terracotta if there's a clash */}
               {hasEvents && (
                 <span
@@ -118,11 +129,11 @@ export default function MonthGrid({ now, calendarEvents, onSelectDay }) {
 
           return (
             <div key={position} className="aspect-square border-r border-b border-line">
-              {hasEvents ? (
+              {hasEvents || hasProposed ? (
                 <button
                   type="button"
                   onClick={() => onSelectDay(date.toISOString())}
-                  aria-label={`${date.toDateString()}, ${dayEvents.length} event${dayEvents.length === 1 ? '' : 's'}`}
+                  aria-label={`${date.toDateString()}, ${dayEvents.length} event${dayEvents.length === 1 ? '' : 's'}${hasProposed ? ', proposed time' : ''}`}
                   className={squareClasses + ' hover:bg-paper/[0.04]'}
                 >
                   {squareContents}

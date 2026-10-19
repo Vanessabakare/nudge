@@ -13,6 +13,7 @@ This file says exactly how to replace each one.
 | Time and nudges | `src/clock/demoClock.js` + `checkNudges` | EventBridge Scheduler |
 | Event details from email | hand-written `extractedEvent` in sample data | Amazon Bedrock extraction |
 | Reschedule email text | `src/logic/draftRescheduleEmail.js` (template) | Amazon Bedrock drafting |
+| Replies to a reschedule | `src/sources/mockReplySimulator.js` + `src/logic/detectReplyOutcome.js` (keywords) | watch the sent email's thread + Bedrock |
 | Who the user is | `src/settings/userProfile.js` (name typed on first visit) | Amazon Cognito |
 
 **Golden rule:** the browser never holds Gmail/Outlook tokens. All provider
@@ -75,6 +76,28 @@ like `mockEmailSender.js`.
 - Optionally reply in the original thread (Gmail `threadId`, Graph `createReply`)
   so the organiser sees the context.
 
+## 4b. Detecting replies to a reschedule request
+
+In the demo, Settings → SIMULATE REPLY creates the reply (`mockReplySimulator.js`)
+and `detectReplyOutcome.js` reads it with a keyword check. In the real app:
+
+- When `sendEmail` sends the request, keep the provider's ids on the event's
+  `reschedule` state: Gmail's message `id` and **`threadId`**, or Outlook's
+  `id` and **`conversationId`**. (Today `sentEmailId` holds the mock id.)
+- **Watch that thread** for new messages from the other person: Gmail
+  `users.watch` (Pub/Sub) or `users.history.list`, filtered to the thread;
+  Outlook change notifications or `GET /me/messages?$filter=conversationId eq '…'`.
+- When a reply arrives, a Lambda passes its text to `detectReplyOutcome`, which
+  becomes a Bedrock call (section 7) returning `"accepted" | "declined" | "unclear"`
+  (and, ideally, any new time they suggest). "unclear" leaves the request as
+  proposed and simply shows the reply in the inbox.
+- Then set the event's `reschedule.status` and push a notification; the app shows
+  the same reply card as the demo.
+- **Never change the calendar on a reply alone.** The event only moves when the
+  user taps UPDATE CALENDAR (`updateCalendar` → the calendar adapter's
+  `updateEvent`). If they decline, PICK ANOTHER TIME offers new slots, leaving
+  out every slot already turned down (`reschedule.declinedSlots`).
+
 ## 5. Calendar — `localCalendar.js` → `googleCalendar.js` / `outlookCalendar.js`
 
 Today the calendar is sample data held in `App` state (`calendarEvents`).
@@ -88,7 +111,7 @@ async removeEvent(eventId)           // -> void
 ```
 
 Then `App` calls these instead of `setCalendarEvents` directly
-(`respond('add')` → `addEvent`, `sendReschedule` → `updateEvent`).
+(`respond('add')` → `addEvent`, `updateCalendar` → `updateEvent`; `sendReschedule` only sends the email and records the proposal).
 
 - **Google Calendar:** Calendar API `events.list / insert / patch / delete` on
   the `primary` calendar. Scope: `calendar.events`. Map `summary` → `title`,

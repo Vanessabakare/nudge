@@ -6,6 +6,8 @@
 // - a greeting for the time of day, and today's date, large
 // - NEXT UP: the next event in the calendar
 // - NEEDS YOUR ANSWER: events still waiting for ADD or NOT FOR ME
+// - AWAITING REPLIES: reschedule requests out with other people
+//   (only shown while there is one)
 // - a folded inbox bar that opens the Inbox tab
 // "Today" and "now" always come from the demo clock.
 // ==========================================================
@@ -13,6 +15,7 @@ import { findConflicts } from '../logic/findConflicts.js'
 import { formatLongDate, formatShortDate, formatTimeRange } from '../logic/formatDates.js'
 import { isWaitingForAnswer, statusLabel } from '../logic/statusLabel.js'
 import { firstNameOf, initialOf, isGuest } from '../settings/userProfile.js'
+import { isClashPending, rescheduleLabel } from '../logic/rescheduleStatus.js'
 
 // Turns 0 into "01", 4 into "05", and so on.
 function formatIndex(position) {
@@ -82,6 +85,9 @@ export default function HomeScreen({
     .filter(isWaitingForAnswer)
     .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
 
+  // ---- Reschedule requests still out with other people ----
+  const awaitingReplies = calendarEvents.filter((event) => event.reschedule)
+
   // "TUE 20 OCT · 7:30–8:30AM"
   const timeLineFor = (event) =>
     `${formatShortDate(event.startTime)} · ${formatTimeRange(event.startTime, event.endTime)}`
@@ -140,7 +146,9 @@ export default function HomeScreen({
         {waiting.length > 0 ? (
           <ol className="mt-6 border-b border-line">
             {waiting.map((event, position) => {
-              const hasClash = findConflicts(event, calendarEvents).length > 0
+              const conflicts = findConflicts(event, calendarEvents)
+              const hasClash = conflicts.length > 0
+              const clashIsPending = isClashPending(conflicts)
               return (
                 <EventRow
                   key={event.id}
@@ -149,13 +157,18 @@ export default function HomeScreen({
                   title={event.title}
                   onClick={() => onOpenEvent(event.id)}
                 >
-                  <div className="mt-4 flex gap-2">
+                  <div className="mt-4 flex flex-wrap gap-2">
                     <span className="border border-paper/50 px-2 py-1 text-[12px] uppercase tracking-[0.35em] text-paper lg:text-[12px]">
                       {statusLabel(event)}
                     </span>
                     {hasClash && (
-                      <span className="border border-accent px-2 py-1 text-[12px] uppercase tracking-[0.35em] text-accent lg:text-[12px]">
-                        Clash
+                      <span
+                        className={
+                          'border px-2 py-1 text-[12px] uppercase tracking-[0.35em] text-accent lg:text-[12px] ' +
+                          (clashIsPending ? 'border-dashed border-accent' : 'border-accent')
+                        }
+                      >
+                        {clashIsPending ? 'Clash · reschedule pending' : 'Clash'}
                       </span>
                     )}
                   </div>
@@ -169,6 +182,30 @@ export default function HomeScreen({
           </p>
         )}
       </section>
+
+      {/* ---- Awaiting replies (only while a reschedule is out) ---- */}
+      {awaitingReplies.length > 0 && (
+        <section className="mt-16">
+          <SectionHeading>Awaiting replies · {awaitingReplies.length}</SectionHeading>
+          <ol className="mt-6 border-b border-line">
+            {awaitingReplies.map((event, position) => (
+              <EventRow
+                key={event.id}
+                position={position}
+                timeLine={timeLineFor(event)}
+                title={event.title}
+                onClick={() => onOpenCalendarEvent(event)}
+              >
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <span className="border border-dashed border-paper/50 px-2 py-1 text-[12px] uppercase tracking-[0.35em] text-paper lg:text-[12px]">
+                    {rescheduleLabel(event)}
+                  </span>
+                </div>
+              </EventRow>
+            ))}
+          </ol>
+        </section>
+      )}
 
       {/* ---- Folded inbox bar ---- */}
       <button

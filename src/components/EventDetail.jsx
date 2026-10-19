@@ -9,6 +9,7 @@
 import { findConflicts } from '../logic/findConflicts.js'
 import { formatDayMonth, formatTimeRange, formatWeekday } from '../logic/formatDates.js'
 import BackLink from './BackLink.jsx'
+import { isClashPending, rescheduleLabel } from '../logic/rescheduleStatus.js'
 import NudgeTracker from './NudgeTracker.jsx'
 
 // Builds the clash message, e.g.
@@ -29,6 +30,8 @@ export default function EventDetail({
 }) {
   const conflicts = findConflicts(event, calendarEvents)
   const isAnswered = ['added', 'dismissed', 'expired'].includes(event.status)
+  // A reschedule request is already out for the clashing event
+  const clashIsPending = isClashPending(conflicts)
 
   // The quiet line shown instead of the buttons once settled
   const settledMessages = {
@@ -74,11 +77,15 @@ export default function EventDetail({
             className="mt-14 border-l border-accent pl-4 text-[12px] uppercase leading-relaxed tracking-[0.25em] text-accent lg:text-[13px]"
           >
             {conflictMessage(conflict)}
+            {/* e.g. "RESCHEDULE PROPOSED · AWAITING AMA" */}
+            {rescheduleLabel(conflict) && (
+              <span className="mt-2 block text-paper">{rescheduleLabel(conflict)}</span>
+            )}
           </p>
         ))}
 
       {/* ---- Offer to move the clashing event instead ---- */}
-      {!isAnswered && conflicts.length > 0 && (
+      {!isAnswered && conflicts.length > 0 && !clashIsPending && (
         <button
           type="button"
           onClick={onReschedule}

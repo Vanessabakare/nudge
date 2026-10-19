@@ -40,9 +40,14 @@ export default function RescheduleScreen({
   const senderName = firstNameOf(userName)
 
   // ---- Free slots: the calendar without the event being moved,
-  // plus the new event, so the move can't create a fresh clash ----
+  // plus the new event, so the move can't create a fresh clash.
+  // Slots the other person already turned down count as busy too. ----
   const durationMinutes = (new Date(eventToMove.endTime) - new Date(eventToMove.startTime)) / minuteInMs
-  const busy = [...calendarEvents.filter((event) => event.id !== eventToMove.id), newEvent]
+  const declinedSlots = (eventToMove.reschedule?.declinedSlots || []).map((slot, index) => ({
+    ...slot,
+    id: `declined-${index}`,
+  }))
+  const busy = [...calendarEvents.filter((event) => event.id !== eventToMove.id), newEvent, ...declinedSlots]
   const slots = findFreeSlots(busy, durationMinutes, { from: now, kind: slotKindFor(eventToMove) })
 
   // ---- Which slot is chosen, and the email draft ----

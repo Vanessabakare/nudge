@@ -9,6 +9,7 @@
 // ==========================================================
 import { useEffect } from 'react'
 import { findConflicts } from '../logic/findConflicts.js'
+import { isClashPending } from '../logic/rescheduleStatus.js'
 import {
   formatDayMonth,
   formatTimeRange,
@@ -27,6 +28,8 @@ export default function NudgeCard({
 }) {
   const conflicts = findConflicts(event, calendarEvents)
   const hasClash = conflicts.length > 0
+  // A reschedule request is already out: no second RESCHEDULE
+  const clashIsPending = isClashPending(conflicts)
 
   // ---- Escape key = NOT NOW ----
   useEffect(() => {
@@ -88,6 +91,7 @@ export default function NudgeCard({
             >
               Clashes with {conflict.title},{' '}
               {formatTimeRange(conflict.startTime, conflict.endTime)}
+              {clashIsPending && ' · reschedule pending'}
             </p>
           ))}
         </div>
@@ -97,7 +101,7 @@ export default function NudgeCard({
           <button type="button" onClick={onAdd} className={`${buttonClass} text-paper hover:bg-paper hover:text-ink`}>
             {hasClash ? 'Add anyway' : 'Add'}
           </button>
-          {hasClash && (
+          {hasClash && !clashIsPending && (
             <button type="button" onClick={onReschedule} className={`${buttonClass} text-muted hover:text-paper`}>
               Reschedule
             </button>

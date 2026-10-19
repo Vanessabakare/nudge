@@ -6,7 +6,8 @@
 // - APPEARANCE: the dark / light switch
 // - SENT: emails sent from Nudge (e.g. reschedule requests)
 // - DEMO CONTROLS: the demo clock's time, SKIP TO NEXT NUDGE,
-//   SKIP 6 HOURS / 1 DAY and RESET DEMO
+//   SKIP 6 HOURS / 1 DAY, SIMULATE REPLY (while a reschedule is
+//   waiting for an answer) and RESET DEMO
 // ==========================================================
 import { useState } from 'react'
 import { formatDemoTime } from '../logic/formatDates.js'
@@ -62,6 +63,8 @@ export default function SettingsScreen({
   onSkip,
   onSkipToNextNudge,
   hasNextNudge,
+  awaitingReplyFrom,
+  onSimulateReply,
   onReset,
   onBack,
 }) {
@@ -168,6 +171,22 @@ export default function SettingsScreen({
           <Row label="Skip to next nudge">No nudges left</Row>
         )}
         <ActionRow label="Skip 6 hours" onClick={() => onSkip(6)} />
+        {/* Pretend the other person has answered the reschedule email */}
+        {awaitingReplyFrom && (
+          <div className="flex items-center justify-between gap-6 border-t border-line py-5 lg:py-6">
+            <p className="text-[12px] uppercase tracking-[0.3em] text-paper lg:text-[13px]">
+              Simulate reply · {awaitingReplyFrom}
+            </p>
+            <div className="flex gap-6 text-[12px] uppercase tracking-[0.3em] lg:text-[13px]">
+              <button type="button" onClick={() => onSimulateReply(true)} className="uppercase text-paper hover:text-muted">
+                Accept
+              </button>
+              <button type="button" onClick={() => onSimulateReply(false)} className="uppercase text-paper hover:text-muted">
+                Decline
+              </button>
+            </div>
+          </div>
+        )}
         <ActionRow label="Skip 1 day" onClick={() => onSkip(24)} />
         <ActionRow label="Reset demo" onClick={onReset} />
       </Section>

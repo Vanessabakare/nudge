@@ -23,6 +23,8 @@ import { formatMonthYear } from './logic/formatDates.js'
 import { isWaitingForAnswer } from './logic/statusLabel.js'
 import { findConflicts } from './logic/findConflicts.js'
 import { sendEmail } from './sources/mockEmailSender.js'
+import { buildSimulatedReply } from './sources/mockReplySimulator.js'
+import { detectReplyOutcome } from './logic/detectReplyOutcome.js'
 import { applyTheme, getSavedTheme, saveTheme } from './settings/theme.js'
 import { clearSavedDemoState, takeResetRequestFromUrl } from './settings/demoState.js'
 import { getUserName, guestName, setUserName } from './settings/userProfile.js'
@@ -30,6 +32,7 @@ import SplashScreen from './components/SplashScreen.jsx'
 import OnboardingScreen from './components/OnboardingScreen.jsx'
 import DesktopSidebar from './components/DesktopSidebar.jsx'
 import NudgeCard from './components/NudgeCard.jsx'
+import ReplyCard from './components/ReplyCard.jsx'
 import SettingsScreen from './components/SettingsScreen.jsx'
 import RescheduleScreen from './components/RescheduleScreen.jsx'
 import HomeScreen from './components/HomeScreen.jsx'
@@ -101,6 +104,9 @@ export default function App() {
   // Nudge cards the user has closed, e.g. "event-001-nudge-1"
   const [closedNudges, setClosedNudges] = useState([])
 
+  // Reply cards the user has closed (by the reply email's id)
+  const [closedReplies, setClosedReplies] = useState([])
+
   // ---- Start (or restart) the demo ----
   // Starts the demo clock at the real current time, loads the emails
   // (which arrived earlier today, so no nudge is due yet), and plans
@@ -135,6 +141,7 @@ export default function App() {
     setCalendarEvents(buildSampleCalendar())
     setSentEmails([])
     setClosedNudges([])
+    setClosedReplies([])
     setActiveTab('Home')
     setSelectedDay(null)
     setScreen('home')
@@ -180,6 +187,16 @@ export default function App() {
   // While rescheduling: the new event, and the calendar event it clashes with
   const rescheduleNewEvent = rescheduleFor && events.find((event) => event.id === rescheduleFor.newEventId)
   const eventToMove = rescheduleNewEvent && findConflicts(rescheduleNewEvent, calendarEvents)[0]
+
+  // A reschedule request still waiting for the other person (for SIMULATE REPLY)
+  const awaitingReply = calendarEvents.find((event) => event.reschedule?.status === 'proposed')
+
+  // A reply that has arrived and not been dealt with yet (shown as a card)
+  const replyToShow = calendarEvents.find(
+    (event) =>
+      ['accepted', 'declined'].includes(event.reschedule?.status) &&
+      !closedReplies.includes(event.reschedule.replyEmailId),
+  )
 
   // Desktop left column subtitle, e.g. "4 NEED YOUR ANSWER", "4 EVENTS SPOTTED", "OCTOBER 2026"
   const sidebarSubtitles = {
@@ -264,19 +281,91 @@ export default function App() {
     }
   }
 
-  // SEND EMAIL on the Reschedule screen: send through the email doorway,
-  // record it, and move the clashing event to the chosen slot
+  // Replace one calendar event with an updated copy
+  function replaceCalendarEvent(updatedEvent) {
+    setCalendarEvents((current) =>
+      current.map((item) => (item.id === updatedEvent.id ? updatedEvent : item)),
+    )
+  }
+
+  // SEND EMAIL on the Reschedule screen: send through the email doorway
+  // and record it. The event does NOT move yet: it is marked as
+  // "proposed" until the other person replies and the user taps UPDATE.
   async function sendReschedule({ email, newSlot }) {
     const sent = await sendEmail(email)
     setSentEmails((current) => [{ ...email, id: sent.id, sentAt: getNow().toISOString() }, ...current])
 
-    const movedEvent = { ...eventToMove, startTime: newSlot.startTime, endTime: newSlot.endTime }
-    setCalendarEvents((current) =>
-      current.map((item) => (item.id === movedEvent.id ? movedEvent : item)),
-    )
+    const proposedEvent = {
+      ...eventToMove,
+      reschedule: {
+        status: 'proposed',
+        proposedSlot: newSlot,
+        sentEmailId: sent.id,
+        contactName: eventToMove.organiserName || 'them',
+        forEventId: rescheduleFor.newEventId,
+        declinedSlots: eventToMove.reschedule?.declinedSlots || [],
+      },
+    }
+    replaceCalendarEvent(proposedEvent)
 
-    setConfirmation({ event: movedEvent, response: 'sent', returnTo: rescheduleFor.returnTo })
+    setConfirmation({ event: proposedEvent, response: 'sent', returnTo: rescheduleFor.returnTo })
     showScreen('confirmation')
+  }
+
+  // SIMULATE REPLY in Settings (demo only): the other person's reply
+  // arrives in the inbox, Nudge reads it, and a reply card appears on Home
+  function simulateReply(isAccepting) {
+    const { reschedule } = awaitingReply
+    const sentEmail = sentEmails.find((email) => email.id === reschedule.sentEmailId)
+    const reply = buildSimulatedReply({
+      sentEmail,
+      contactName: reschedule.contactName,
+      proposedSlot: reschedule.proposedSlot,
+      isAccepting,
+      now: getNow().toISOString(),
+    })
+    setEmails((current) => [reply, ...current])
+
+    const outcome = detectReplyOutcome(reply.body)
+    if (outcome === 'unclear') return // leave it proposed; the user can read the email
+
+    replaceCalendarEvent({
+      ...awaitingReply,
+      reschedule: {
+        ...reschedule,
+        status: outcome,
+        replyEmailId: reply.id,
+        declinedSlots:
+          outcome === 'declined' ? [...reschedule.declinedSlots, reschedule.proposedSlot] : reschedule.declinedSlots,
+      },
+    })
+    goHome()
+  }
+
+  // UPDATE CALENDAR (after they agreed): only now does the event move.
+  // The placeholder and the clash disappear with the reschedule state.
+  function updateCalendar(calendarEvent) {
+    const { reschedule, ...eventWithoutReschedule } = calendarEvent
+    const movedEvent = {
+      ...eventWithoutReschedule,
+      startTime: reschedule.proposedSlot.startTime,
+      endTime: reschedule.proposedSlot.endTime,
+    }
+    replaceCalendarEvent(movedEvent)
+    setConfirmation({ event: movedEvent, response: 'updated', returnTo: 'home' })
+    showScreen('confirmation')
+  }
+
+  // PICK ANOTHER TIME (after they declined): back to the Reschedule screen,
+  // which leaves out every slot already turned down
+  function pickAnotherTime(calendarEvent) {
+    setClosedReplies((current) => [...current, calendarEvent.reschedule.replyEmailId])
+    openReschedule(calendarEvent.reschedule.forEventId, 'home')
+  }
+
+  // NOT NOW on a reply card: close it (the event detail still offers the next step)
+  function closeReplyCard() {
+    setClosedReplies((current) => [...current, replyToShow.reschedule.replyEmailId])
   }
 
   // NOT NOW on the nudge card (or a tap outside it): close the card,
@@ -327,7 +416,13 @@ export default function App() {
     )
   } else if (screen === 'calendarEvent' && selectedCalendarEvent) {
     content = (
-      <CalendarEventDetail event={selectedCalendarEvent} backLabel={activeTab} onBack={goHome} />
+      <CalendarEventDetail
+        event={selectedCalendarEvent}
+        backLabel={activeTab}
+        onUpdate={() => updateCalendar(selectedCalendarEvent)}
+        onPickAnother={() => pickAnotherTime(selectedCalendarEvent)}
+        onBack={goHome}
+      />
     )
   } else if (screen === 'settings') {
     content = (
@@ -341,6 +436,8 @@ export default function App() {
         onToggleTheme={toggleTheme}
         onSkip={skip}
         onSkipToNextNudge={skipToNextNudge}
+        awaitingReplyFrom={awaitingReply?.reschedule.contactName}
+        onSimulateReply={simulateReply}
         hasNextNudge={Boolean(findNextNudgeTime(events, now))}
         onReset={resetDemo}
         onBack={goHome}
@@ -357,7 +454,18 @@ export default function App() {
   } else {
     content = (
       <>
-        {waitingNudge && (
+        {/* A reply from someone comes first; otherwise the latest nudge */}
+        {replyToShow && (
+          <ReplyCard
+            key={replyToShow.reschedule.replyEmailId}
+            calendarEvent={replyToShow}
+            onUpdate={() => updateCalendar(replyToShow)}
+            onPickAnother={() => pickAnotherTime(replyToShow)}
+            onNotNow={closeReplyCard}
+          />
+        )}
+
+        {!replyToShow && waitingNudge && (
           <NudgeCard
             key={waitingNudge.key}
             event={waitingNudge.event}

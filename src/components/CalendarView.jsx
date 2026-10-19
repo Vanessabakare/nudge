@@ -5,12 +5,17 @@
 // the numbered |01| style. Events added through Nudge are
 // labelled VIA NUDGE; events that overlap on the same day are
 // both labelled CLASH in the accent colour.
+// While a reschedule is pending, the event shows its status
+// ("RESCHEDULE PROPOSED · AWAITING AMA"), its clash reads
+// "CLASH · RESCHEDULE PENDING", and the proposed time appears as a
+// dashed PROPOSED placeholder.
 //
 // Opened from the month grid (phone and desktop), starting on
 // the picked day, with a "← MONTH" link back to the grid (onBack).
 // ==========================================================
 import { findConflicts } from '../logic/findConflicts.js'
 import { formatDayMonth, formatTimeRange, formatWeekday } from '../logic/formatDates.js'
+import { isClashPending, proposedPlaceholders, rescheduleLabel } from '../logic/rescheduleStatus.js'
 import BackLink from './BackLink.jsx'
 
 const daysToShow = 14
@@ -56,7 +61,8 @@ function groupByDay(calendarEvents, fromIso) {
 
 // "now" is the day the agenda starts from
 export default function CalendarView({ calendarEvents, now, onOpenEvent, onBack }) {
-  const days = groupByDay(calendarEvents, now)
+  // Real events plus dashed placeholders for proposed new times
+  const days = groupByDay([...calendarEvents, ...proposedPlaceholders(calendarEvents)], now)
 
   // ---- Layout ----
   return (
@@ -88,8 +94,41 @@ export default function CalendarView({ calendarEvents, now, onOpenEvent, onBack 
 
             <ol className="mt-8 border-b border-line">
               {day.events.map((event, position) => {
-                const hasClash = findConflicts(event, day.events).length > 0
+                // A proposed time that isn't agreed yet: dashed and quiet
+                if (event.isPlaceholder) {
+                  const original = calendarEvents.find((item) => item.id === event.placeholderFor)
+                  return (
+                    <li key={event.id} className="border-t border-line py-4">
+                      <button
+                        type="button"
+                        onClick={() => onOpenEvent(original)}
+                        className="flex w-full gap-5 border border-dashed border-muted px-3 py-4 text-left lg:gap-6"
+                      >
+                        <span className="w-9 shrink-0 pt-px text-[12px] tracking-[0.2em] text-muted lg:w-12 lg:text-[12px]">
+                          |{formatIndex(position)}|
+                        </span>
+                        <div className="min-w-0 text-muted">
+                          <p className="text-[12px] uppercase tracking-[0.35em] lg:text-[12px]">
+                            {formatTimeRange(event.startTime, event.endTime)} · Proposed
+                          </p>
+                          <p className="mt-2 text-[13px] uppercase leading-relaxed tracking-[0.15em] lg:text-[15px]">
+                            {event.title}
+                          </p>
+                          <p className="mt-1 text-[12px] uppercase leading-relaxed tracking-[0.3em] lg:text-[12px]">
+                            Awaiting {event.reschedule.contactName}
+                          </p>
+                        </div>
+                      </button>
+                    </li>
+                  )
+                }
+
+                const realEvents = day.events.filter((item) => !item.isPlaceholder)
+                const conflicts = findConflicts(event, realEvents)
+                const hasClash = conflicts.length > 0
+                const clashIsPending = isClashPending([event, ...conflicts])
                 const isViaNudge = Boolean(event.sourceEmailId)
+                const statusLine = rescheduleLabel(event)
 
                 return (
                   <li key={event.id} className="border-t border-line">
@@ -120,16 +159,26 @@ export default function CalendarView({ calendarEvents, now, onOpenEvent, onBack 
                         </p>
 
                         {/* Labels, only when they apply */}
-                        {(isViaNudge || hasClash) && (
-                          <div className="mt-4 flex gap-2">
+                        {(isViaNudge || hasClash || statusLine) && (
+                          <div className="mt-4 flex flex-wrap gap-2">
                             {isViaNudge && (
                               <span className="border border-paper/50 px-2 py-1 text-[12px] uppercase tracking-[0.35em] text-paper lg:text-[12px]">
                                 Via Nudge
                               </span>
                             )}
                             {hasClash && (
-                              <span className="border border-accent px-2 py-1 text-[12px] uppercase tracking-[0.35em] text-accent lg:text-[12px]">
-                                Clash
+                              <span
+                                className={
+                                  'border px-2 py-1 text-[12px] uppercase tracking-[0.35em] text-accent lg:text-[12px] ' +
+                                  (clashIsPending ? 'border-dashed border-accent' : 'border-accent')
+                                }
+                              >
+                                {clashIsPending ? 'Clash · reschedule pending' : 'Clash'}
+                              </span>
+                            )}
+                            {statusLine && (
+                              <span className="border border-dashed border-paper/50 px-2 py-1 text-[12px] uppercase tracking-[0.35em] text-paper lg:text-[12px]">
+                                {statusLine}
                               </span>
                             )}
                           </div>
