@@ -6,7 +6,7 @@
 // Phone only: on desktop the DesktopSidebar takes its place.
 // ==========================================================
 
-const tabs = ['Inbox', 'Calendar']
+const tabs = ['Home', 'Inbox', 'Calendar']
 
 export default function BottomNav({ activeTab, onSelectTab }) {
   return (

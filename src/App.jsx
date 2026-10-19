@@ -19,10 +19,12 @@ import { checkNudges } from './logic/checkNudges.js'
 import { respondToNudge } from './logic/respondToNudge.js'
 import { findLatestWaitingNudge } from './logic/findLatestWaitingNudge.js'
 import { formatMonthYear } from './logic/formatDates.js'
+import { isWaitingForAnswer } from './logic/statusLabel.js'
 import SplashScreen from './components/SplashScreen.jsx'
 import DemoControl from './components/DemoControl.jsx'
 import DesktopSidebar from './components/DesktopSidebar.jsx'
 import NudgeBanner from './components/NudgeBanner.jsx'
+import HomeScreen from './components/HomeScreen.jsx'
 import InboxList from './components/InboxList.jsx'
 import CalendarView from './components/CalendarView.jsx'
 import MonthGrid from './components/MonthGrid.jsx'
@@ -53,13 +55,13 @@ export default function App() {
 
   // ---- Which screen is showing ----
   const [showSplash, setShowSplash] = useState(true)
-  const [activeTab, setActiveTab] = useState('Inbox') // "Inbox" | "Calendar"
+  const [activeTab, setActiveTab] = useState('Home') // "Home" | "Inbox" | "Calendar"
   const [screen, setScreen] = useState('home') // "home" | "detail" | "calendarEvent" | "confirmation"
   const [selectedEventId, setSelectedEventId] = useState(null)
   const [selectedCalendarEventId, setSelectedCalendarEventId] = useState(null)
   const [lastResponse, setLastResponse] = useState(null) // "add" | "dismiss"
 
-  // Desktop only: the day picked in the month grid (null = show the grid)
+  // The day picked in the month grid (null = show the grid)
   const [selectedDay, setSelectedDay] = useState(null)
 
   // Nudge banners the user has closed, e.g. "event-001-nudge-1"
@@ -94,7 +96,7 @@ export default function App() {
   function resetDemo() {
     setCalendarEvents(sampleCalendar)
     setClosedBanners([])
-    setActiveTab('Inbox')
+    setActiveTab('Home')
     setSelectedDay(null)
     setScreen('home')
     window.scrollTo(0, 0)
@@ -127,9 +129,13 @@ export default function App() {
   )
   const waitingNudge = findLatestWaitingNudge(events, closedBanners)
 
-  // Desktop left column subtitle, e.g. "4 EVENTS SPOTTED" or "OCTOBER 2026"
-  const sidebarSubtitle =
-    activeTab === 'Inbox' ? `${events.length} events spotted` : formatMonthYear(now)
+  // Desktop left column subtitle, e.g. "4 NEED YOUR ANSWER", "4 EVENTS SPOTTED", "OCTOBER 2026"
+  const sidebarSubtitles = {
+    Home: `${events.filter(isWaitingForAnswer).length} need your answer`,
+    Inbox: `${events.length} events spotted`,
+    Calendar: formatMonthYear(now),
+  }
+  const sidebarSubtitle = sidebarSubtitles[activeTab]
 
   // ---- Actions ----
   function showScreen(name) {
@@ -166,7 +172,7 @@ export default function App() {
     }
   }
 
-  // Desktop month grid: pick a day, or go back to the grid
+  // Month grid: pick a day, or go back to the grid (null)
   function selectDay(dayIso) {
     setSelectedDay(dayIso)
     window.scrollTo(0, 0)
@@ -246,32 +252,34 @@ export default function App() {
           />
         )}
 
+        {activeTab === 'Home' && (
+          <HomeScreen
+            now={now}
+            events={events}
+            calendarEvents={calendarEvents}
+            emailCount={emails.length}
+            onOpenEvent={openEvent}
+            onOpenCalendarEvent={openCalendarEvent}
+            onShowInbox={() => selectTab('Inbox')}
+          />
+        )}
+
         {activeTab === 'Inbox' && (
           <InboxList emails={emails} events={events} now={now} onOpenEvent={openEvent} />
         )}
 
-        {activeTab === 'Calendar' && (
-          <>
-            {/* Phone: the agenda of the next 14 days */}
-            <div className="lg:hidden">
-              <CalendarView calendarEvents={calendarEvents} now={now} onOpenEvent={openCalendarEvent} />
-            </div>
-
-            {/* Desktop: the month grid, or the agenda from a picked day */}
-            <div className="hidden lg:block">
-              {selectedDay ? (
-                <CalendarView
-                  calendarEvents={calendarEvents}
-                  now={selectedDay}
-                  onOpenEvent={openCalendarEvent}
-                  onBack={() => selectDay(null)}
-                />
-              ) : (
-                <MonthGrid now={now} calendarEvents={calendarEvents} onSelectDay={selectDay} />
-              )}
-            </div>
-          </>
-        )}
+        {/* Calendar: the month grid, or the agenda from a picked day */}
+        {activeTab === 'Calendar' &&
+          (selectedDay ? (
+            <CalendarView
+              calendarEvents={calendarEvents}
+              now={selectedDay}
+              onOpenEvent={openCalendarEvent}
+              onBack={() => selectDay(null)}
+            />
+          ) : (
+            <MonthGrid now={now} calendarEvents={calendarEvents} onSelectDay={selectDay} />
+          ))}
 
         <BottomNav activeTab={activeTab} onSelectTab={selectTab} />
       </>

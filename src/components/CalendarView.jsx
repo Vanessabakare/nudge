@@ -6,9 +6,8 @@
 // labelled VIA NUDGE; events that overlap on the same day are
 // both labelled CLASH in the accent colour.
 //
-// Phone: the next 14 days from today.
-// Desktop: opened from the month grid, starting on the picked
-// day, with a "← MONTH" link back to the grid (onBack).
+// Opened from the month grid (phone and desktop), starting on
+// the picked day, with a "← MONTH" link back to the grid (onBack).
 // ==========================================================
 import { findConflicts } from '../logic/findConflicts.js'
 import { formatDayMonth, formatTimeRange, formatWeekday } from '../logic/formatDates.js'
@@ -61,26 +60,12 @@ export default function CalendarView({ calendarEvents, now, onOpenEvent, onBack 
 
   // ---- Layout ----
   return (
-    <main className="mx-auto max-w-md px-6 pt-16 pb-32 animate-fade-in lg:mx-0 lg:max-w-3xl lg:px-16 lg:pt-14 lg:pb-20">
-      {onBack ? (
-        // ---- Desktop, opened from the month grid ----
-        <>
-          <BackLink desktopLabel="Month" onClick={onBack} />
-          <p className="mt-6 text-[12px] uppercase tracking-[0.4em] text-muted">
-            {daysToShow} days from {formatDayMonth(now)}
-          </p>
-        </>
-      ) : (
-        // ---- Phone heading ----
-        <>
-          <h2 className="text-[11px] font-light uppercase tracking-[0.4em] text-paper">
-            Calendar
-          </h2>
-          <p className="mt-3 text-[9px] uppercase tracking-[0.4em] text-muted">
-            Next {daysToShow} days
-          </p>
-        </>
-      )}
+    <main className="mx-auto max-w-md px-6 pt-10 pb-32 animate-fade-in lg:mx-0 lg:max-w-3xl lg:px-16 lg:pt-14 lg:pb-20">
+      {/* ---- Back to the month grid ---- */}
+      <BackLink desktopLabel="Month" phoneLabel="Month" onClick={onBack} />
+      <p className="mt-6 text-[9px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">
+        {daysToShow} days from {formatDayMonth(now)}
+      </p>
 
       {/* ---- Empty state ---- */}
       {days.length === 0 && (

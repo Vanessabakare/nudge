@@ -1,6 +1,6 @@
 // ==========================================================
 // MonthGrid
-// Desktop only: the month that contains the demo clock's "now",
+// The month that contains the demo clock's "now" (phone and desktop),
 // as a grid of square days drawn with thin 1px lines.
 // - Day numbers in the serif; past days faded; today underlined.
 // - Days with events get a small off-white dot, or a terracotta
@@ -43,16 +43,21 @@ export default function MonthGrid({ now, calendarEvents, onSelectDay }) {
 
   // ---- Layout ----
   return (
-    <main className="px-16 pt-14 pb-20 animate-fade-in">
+    <main className="mx-auto max-w-md px-6 pt-16 pb-32 animate-fade-in lg:mx-0 lg:max-w-none lg:px-16 lg:pt-14 lg:pb-20">
+      {/* Phone: the small section heading, as on the inbox */}
+      <p className="mb-10 text-[11px] font-light uppercase tracking-[0.4em] text-paper lg:hidden">
+        Calendar
+      </p>
+
       {/* ---- Month name ---- */}
-      <h2 className="font-serif text-[clamp(4rem,6vw,6.5rem)] leading-none tracking-tight text-paper">
+      <h2 className="font-serif text-[clamp(3rem,15vw,4.5rem)] leading-none tracking-tight text-paper lg:text-[clamp(4rem,6vw,6.5rem)]">
         {formatMonthName(now)}
       </h2>
 
       {/* ---- Weekday headers ---- */}
-      <div className="mt-12 grid grid-cols-7 pb-4">
+      <div className="mt-10 grid grid-cols-7 pb-3 lg:mt-12 lg:pb-4">
         {weekdayHeaders.map((name) => (
-          <p key={name} className="text-[12px] uppercase tracking-[0.35em] text-muted">
+          <p key={name} className="text-[8px] uppercase tracking-[0.2em] text-muted lg:text-[12px] lg:tracking-[0.35em]">
             {name}
           </p>
         ))}
@@ -80,8 +85,8 @@ export default function MonthGrid({ now, calendarEvents, onSelectDay }) {
               {/* Day number, underlined if today */}
               <span
                 className={
-                  'font-serif text-[clamp(1.25rem,1.8vw,2rem)] leading-none text-paper ' +
-                  (isToday ? 'underline decoration-1 underline-offset-[10px]' : '')
+                  'font-serif text-[15px] leading-none text-paper lg:text-[clamp(1.25rem,1.8vw,2rem)] ' +
+                  (isToday ? 'underline decoration-1 underline-offset-4 lg:underline-offset-[10px]' : '')
                 }
               >
                 {date.getDate()}
@@ -89,7 +94,7 @@ export default function MonthGrid({ now, calendarEvents, onSelectDay }) {
 
               {/* Count, only when there is more than one event */}
               {dayEvents.length > 1 && (
-                <span className="absolute top-3 right-3 text-[12px] tracking-[0.2em] text-muted">
+                <span className="absolute top-1 right-1.5 text-[8px] text-muted lg:top-3 lg:right-3 lg:text-[12px] lg:tracking-[0.2em]">
                   {dayEvents.length}
                 </span>
               )}
@@ -98,7 +103,8 @@ export default function MonthGrid({ now, calendarEvents, onSelectDay }) {
               {hasEvents && (
                 <span
                   className={
-                    'absolute bottom-4 left-4 h-1.5 w-1.5 ' + (hasClash ? 'bg-accent' : 'bg-paper')
+                    'absolute bottom-2 left-2 h-1 w-1 lg:bottom-4 lg:left-4 lg:h-1.5 lg:w-1.5 ' +
+                    (hasClash ? 'bg-accent' : 'bg-paper')
                   }
                 />
               )}
@@ -108,7 +114,7 @@ export default function MonthGrid({ now, calendarEvents, onSelectDay }) {
           // Flex + items-start keeps the number at the top: buttons
           // otherwise centre their contents vertically
           const squareClasses =
-            'relative flex h-full w-full items-start p-4 text-left ' + (isPast ? 'opacity-35' : '')
+            'relative flex h-full w-full items-start p-2 text-left lg:p-4 ' + (isPast ? 'opacity-35' : '')
 
           return (
             <div key={position} className="aspect-square border-r border-b border-line">

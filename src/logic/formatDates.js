@@ -80,6 +80,21 @@ export function formatReceived(nowIso, receivedIso) {
   return formatDayMonth(receivedIso)
 }
 
+// -> "Monday 19 October" (as written; used large in the serif on Home)
+export function formatLongDate(isoString) {
+  const date = new Date(isoString)
+  const weekday = date.toLocaleDateString('en-GB', { weekday: 'long' })
+  const month = date.toLocaleDateString('en-GB', { month: 'long' })
+  return `${weekday} ${date.getDate()} ${month}`
+}
+
+// -> "TUE 20 OCT"
+export function formatShortDate(isoString) {
+  const date = new Date(isoString)
+  const weekday = date.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase()
+  return `${weekday} ${formatDayMonth(isoString)}`
+}
+
 // -> "October" (the month name, as written; used large in the serif)
 export function formatMonthName(isoString) {
   return new Date(isoString).toLocaleDateString('en-GB', { month: 'long' })

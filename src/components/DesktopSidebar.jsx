@@ -6,9 +6,9 @@
 // phones it is hidden entirely.
 // ==========================================================
 
-const tabs = ['Inbox', 'Calendar']
+const tabs = ['Home', 'Inbox', 'Calendar']
 
-// Turns 0 into "01", 1 into "02"
+// Turns 0 into "01", 1 into "02", and so on
 function formatIndex(position) {
   return String(position + 1).padStart(2, '0')
 }

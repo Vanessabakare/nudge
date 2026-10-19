@@ -9,28 +9,17 @@
 // status label underneath.
 // ==========================================================
 import { formatReceived } from '../logic/formatDates.js'
+import { isWaitingForAnswer, statusLabel } from '../logic/statusLabel.js'
 
 // Turns 0 into "01", 4 into "05", and so on.
 function formatIndex(position) {
   return String(position + 1).padStart(2, '0')
 }
 
-// The small label shown for an event, based on its status
-function statusLabel(event) {
-  if (event.status === 'added') return 'Added'
-  if (event.status === 'dismissed') return 'Dismissed'
-  if (event.status === 'expired') return 'Expired'
-  if (event.status === 'nudged') {
-    const sentCount = event.nudges.filter((nudge) => nudge.sentAt).length
-    return `Nudge ${sentCount} of ${event.nudges.length}`
-  }
-  return 'Event spotted'
-}
-
 // The status label itself. Outlined while waiting for an answer;
 // plain once answered. extraClasses sets where it shows.
 function StatusLabel({ event, extraClasses }) {
-  const isWaiting = event.status === 'spotted' || event.status === 'nudged'
+  const isWaiting = isWaitingForAnswer(event)
   return (
     <p
       className={
