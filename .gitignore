@@ -25,3 +25,8 @@ dist-ssr
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Environment files (secrets such as AWS keys)
+.env
+.env.*
+!.env.example
