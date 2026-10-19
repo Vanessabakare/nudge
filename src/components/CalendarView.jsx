@@ -63,13 +63,13 @@ export default function CalendarView({ calendarEvents, now, onOpenEvent, onBack 
     <main className="mx-auto max-w-md px-6 pt-10 pb-32 animate-fade-in lg:mx-0 lg:max-w-3xl lg:px-16 lg:pt-14 lg:pb-20">
       {/* ---- Back to the month grid ---- */}
       <BackLink desktopLabel="Month" phoneLabel="Month" onClick={onBack} />
-      <p className="mt-6 text-[9px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">
+      <p className="mt-6 text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">
         {daysToShow} days from {formatDayMonth(now)}
       </p>
 
       {/* ---- Empty state ---- */}
       {days.length === 0 && (
-        <p className="mt-40 text-center text-[11px] uppercase tracking-[0.4em] text-muted lg:text-[13px]">
+        <p className="mt-40 text-center text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[13px]">
           Nothing planned.
         </p>
       )}
@@ -79,7 +79,7 @@ export default function CalendarView({ calendarEvents, now, onOpenEvent, onBack 
         const firstEvent = day.events[0]
         return (
           <section key={day.key} className="mt-16">
-            <p className="text-[10px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">
+            <p className="text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">
               {formatWeekday(firstEvent.startTime)}
             </p>
             <h3 className="mt-2 font-serif text-[clamp(3rem,15vw,4.5rem)] leading-none tracking-tight text-paper lg:text-[5.5rem]">
@@ -99,13 +99,13 @@ export default function CalendarView({ calendarEvents, now, onOpenEvent, onBack 
                       className="flex w-full gap-5 py-6 text-left lg:gap-6 lg:py-7 lg:hover:bg-paper/[0.03]"
                     >
                       {/* Index number, e.g. |01| */}
-                      <span className="w-9 shrink-0 pt-px text-[11px] tracking-[0.2em] text-muted lg:w-12 lg:text-[12px]">
+                      <span className="w-9 shrink-0 pt-px text-[12px] tracking-[0.2em] text-muted lg:w-12 lg:text-[12px]">
                         |{formatIndex(position)}|
                       </span>
 
                       <div className="min-w-0">
                         {/* Time */}
-                        <p className="text-[10px] uppercase tracking-[0.35em] text-muted lg:text-[12px]">
+                        <p className="text-[12px] uppercase tracking-[0.35em] text-muted lg:text-[12px]">
                           {formatTimeRange(event.startTime, event.endTime)}
                         </p>
 
@@ -115,7 +115,7 @@ export default function CalendarView({ calendarEvents, now, onOpenEvent, onBack 
                         </p>
 
                         {/* Location */}
-                        <p className="mt-1 text-[10px] uppercase leading-relaxed tracking-[0.3em] text-muted lg:text-[12px]">
+                        <p className="mt-1 text-[12px] uppercase leading-relaxed tracking-[0.3em] text-muted lg:text-[12px]">
                           {event.location}
                         </p>
 
@@ -123,12 +123,12 @@ export default function CalendarView({ calendarEvents, now, onOpenEvent, onBack 
                         {(isViaNudge || hasClash) && (
                           <div className="mt-4 flex gap-2">
                             {isViaNudge && (
-                              <span className="border border-paper/50 px-2 py-1 text-[9px] uppercase tracking-[0.35em] text-paper lg:text-[12px]">
+                              <span className="border border-paper/50 px-2 py-1 text-[12px] uppercase tracking-[0.35em] text-paper lg:text-[12px]">
                                 Via Nudge
                               </span>
                             )}
                             {hasClash && (
-                              <span className="border border-accent px-2 py-1 text-[9px] uppercase tracking-[0.35em] text-accent lg:text-[12px]">
+                              <span className="border border-accent px-2 py-1 text-[12px] uppercase tracking-[0.35em] text-accent lg:text-[12px]">
                                 Clash
                               </span>
                             )}

@@ -11,12 +11,12 @@
      The light palette further down swaps these same tokens.
      ink = background, paper = main text */
   --color-ink: #0e0d0c;
-  --color-paper: #f2eee7;
-  --color-muted: #8a857d;
-  --color-line: #2a2826;
+  --color-paper: #ffffff;
+  --color-muted: #b3aba0;
+  --color-line: #34302c;
 
   /* The single accent: warm terracotta. Use rarely. */
-  --color-accent: #c4673f;
+  --color-accent: #d98a6a;
 
   /* The dimming layer behind the nudge card (colour with see-through) */
   --color-scrim: rgb(14 13 12 / 0.6);
@@ -83,10 +83,10 @@
    ========================================================== */
 :root[data-theme="light"] {
   --color-ink: #f6f2ec;
-  --color-paper: #1a1816;
-  --color-muted: #7a7268;
-  --color-line: #ddd5ca;
-  --color-accent: #b5582f;
+  --color-paper: #000000;
+  --color-muted: #5f584f;
+  --color-line: #d6cdc1;
+  --color-accent: #a8502a;
   --color-scrim: rgb(26 24 22 / 0.28);
   color-scheme: light;
 }
@@ -109,7 +109,7 @@ body {
   background-color: var(--color-ink);
   color: var(--color-paper);
   font-family: var(--font-sans);
-  font-weight: 300;
+  font-weight: 400; /* Jost never goes below regular, for legibility */
   -webkit-font-smoothing: antialiased;
 }
 

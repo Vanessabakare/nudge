@@ -15,7 +15,7 @@ export default function BackLink({ desktopLabel, phoneLabel, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`text-[10px] uppercase tracking-[0.4em] ${phoneColour} lg:text-[13px] lg:text-paper`}
+      className={`text-[12px] uppercase tracking-[0.4em] ${phoneColour} lg:text-[13px] lg:text-paper`}
     >
       <span className="lg:hidden">← {phoneLabel || 'Back'}</span>
       <span className="hidden lg:inline">← {desktopLabel}</span>

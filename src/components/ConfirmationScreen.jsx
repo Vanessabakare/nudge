@@ -38,7 +38,7 @@ export default function ConfirmationScreen({ event, response, onFinish }) {
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-ink px-6 text-center animate-confirm-out">
       <div className="animate-fade-in">
         <h1 className="font-serif text-[clamp(3.5rem,18vw,6rem)] leading-none text-paper">{heading}</h1>
-        <p className="mt-8 text-[11px] uppercase leading-relaxed tracking-[0.35em] text-muted lg:text-[13px]">
+        <p className="mt-8 text-[12px] uppercase leading-relaxed tracking-[0.35em] text-muted lg:text-[13px]">
           {line}
         </p>
       </div>

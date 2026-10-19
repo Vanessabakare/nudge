@@ -21,7 +21,7 @@ export default function BottomNav({ activeTab, onSelectTab }) {
               onClick={() => onSelectTab(tab)}
               aria-current={isActive ? 'page' : undefined}
               className={
-                'border-b pb-1 text-[11px] uppercase tracking-[0.4em] ' +
+                'border-b pb-1 text-[12px] uppercase tracking-[0.4em] ' +
                 (isActive ? 'border-paper text-paper' : 'border-transparent text-muted hover:text-paper')
               }
             >

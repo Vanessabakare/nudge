@@ -38,7 +38,7 @@ export default function NudgeCard({
   }, [onNotNow])
 
   const buttonClass =
-    'w-full border-t border-line py-4 text-[11px] uppercase tracking-[0.35em] lg:py-5 lg:text-[12px]'
+    'w-full border-t border-line py-4 text-[12px] uppercase tracking-[0.35em] lg:py-5 lg:text-[12px]'
 
   // ---- Layout ----
   return (
@@ -57,12 +57,12 @@ export default function NudgeCard({
       >
         <div className="px-7 pt-8 pb-7 lg:px-10 lg:pt-10">
           {/* Which nudge, and how long until the event */}
-          <p className="text-[9px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">
+          <p className="text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">
             Nudge {nudgeNumber} of {event.nudges.length} · {formatTimeUntil(now, event.startTime)}
           </p>
 
           {/* The date, large */}
-          <p className="mt-8 text-[10px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">
+          <p className="mt-8 text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">
             {formatWeekday(event.startTime)}
           </p>
           <p className="mt-2 font-serif text-[clamp(3.5rem,16vw,4.5rem)] leading-none tracking-tight text-paper lg:text-[5rem]">
@@ -76,7 +76,7 @@ export default function NudgeCard({
           >
             {event.title}
           </h2>
-          <p className="mt-3 text-[10px] uppercase leading-relaxed tracking-[0.3em] text-muted lg:text-[12px]">
+          <p className="mt-3 text-[12px] uppercase leading-relaxed tracking-[0.3em] text-muted lg:text-[12px]">
             {formatTimeRange(event.startTime, event.endTime)} · {event.location}
           </p>
 
@@ -84,7 +84,7 @@ export default function NudgeCard({
           {conflicts.map((conflict) => (
             <p
               key={conflict.id}
-              className="mt-5 border-l border-accent pl-3 text-[10px] uppercase leading-relaxed tracking-[0.3em] text-accent lg:text-[12px]"
+              className="mt-5 border-l border-accent pl-3 text-[12px] uppercase leading-relaxed tracking-[0.3em] text-accent lg:text-[12px]"
             >
               Clashes with {conflict.title},{' '}
               {formatTimeRange(conflict.startTime, conflict.endTime)}

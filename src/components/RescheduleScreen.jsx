@@ -104,22 +104,22 @@ export default function RescheduleScreen({
       <BackLink desktopLabel="Back" onClick={onBack} />
 
       {/* ---- The event being moved ---- */}
-      <p className="mt-16 text-[10px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">Reschedule</p>
+      <p className="mt-16 text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">Reschedule</p>
       <h1 className="mt-4 font-serif text-[clamp(2.75rem,12vw,4rem)] leading-[1.05] tracking-tight text-paper lg:text-[5.5rem]">
         {eventToMove.title}
       </h1>
-      <p className="mt-6 text-[10px] uppercase leading-relaxed tracking-[0.3em] text-muted lg:text-[12px]">
+      <p className="mt-6 text-[12px] uppercase leading-relaxed tracking-[0.3em] text-muted lg:text-[12px]">
         {slotLabel(eventToMove)} · {eventToMove.location}
       </p>
-      <p className="mt-4 border-l border-accent pl-3 text-[10px] uppercase leading-relaxed tracking-[0.3em] text-accent lg:text-[12px]">
+      <p className="mt-4 border-l border-accent pl-3 text-[12px] uppercase leading-relaxed tracking-[0.3em] text-accent lg:text-[12px]">
         Clashes with {newEvent.title}, {formatTimeRange(newEvent.startTime, newEvent.endTime)}
       </p>
 
       {/* ---- Free slots ---- */}
       <section className="mt-16">
-        <h2 className="text-[10px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">Free slots for you</h2>
+        <h2 className="text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">Free slots for you</h2>
         {slots.length === 0 ? (
-          <p className="mt-6 text-[11px] uppercase tracking-[0.4em] text-muted lg:text-[13px]">
+          <p className="mt-6 text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[13px]">
             No free slots in the next 7 days.
           </p>
         ) : (
@@ -135,7 +135,7 @@ export default function RescheduleScreen({
                     onClick={() => chooseSlot(position)}
                     className="flex w-full items-center gap-5 py-5 text-left lg:gap-6 lg:py-6"
                   >
-                    <span className="w-9 shrink-0 text-[11px] tracking-[0.2em] text-muted lg:w-12 lg:text-[12px]">
+                    <span className="w-9 shrink-0 text-[12px] tracking-[0.2em] text-muted lg:w-12 lg:text-[12px]">
                       |{formatIndex(position)}|
                     </span>
                     <span
@@ -161,14 +161,14 @@ export default function RescheduleScreen({
       {/* ---- The drafted email ---- */}
       {draft && (
         <section className="mt-16">
-          <h2 className="text-[10px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">Draft to {recipientName}</h2>
+          <h2 className="text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">Draft to {recipientName}</h2>
 
-          <div className="mt-6 space-y-2 border-t border-line pt-5 text-[10px] uppercase tracking-[0.3em] text-muted lg:text-[12px]">
+          <div className="mt-6 space-y-2 border-t border-line pt-5 text-[12px] uppercase tracking-[0.3em] text-muted lg:text-[12px]">
             <p>
-              To · <span className="normal-case tracking-[0.05em] text-paper">{draft.to}</span>
+              To · <span className="text-[13px] normal-case tracking-[0.05em] text-paper lg:text-[15px]">{draft.to}</span>
             </p>
             <p>
-              Subject · <span className="normal-case tracking-[0.05em] text-paper">{draft.subject}</span>
+              Subject · <span className="text-[13px] normal-case tracking-[0.05em] text-paper lg:text-[15px]">{draft.subject}</span>
             </p>
           </div>
 
@@ -192,13 +192,13 @@ export default function RescheduleScreen({
           />
 
           {timeWarning && (
-            <p className="mt-4 text-[10px] uppercase leading-relaxed tracking-[0.3em] text-accent lg:text-[12px]">
+            <p className="mt-4 text-[12px] uppercase leading-relaxed tracking-[0.3em] text-accent lg:text-[12px]">
               Check the message mentions {slotLabel(chosenSlot)}
             </p>
           )}
 
           {sendError && (
-            <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-accent lg:text-[12px]">{sendError}</p>
+            <p className="mt-4 text-[12px] uppercase tracking-[0.3em] text-accent lg:text-[12px]">{sendError}</p>
           )}
 
           {/* ---- SEND EMAIL | EDIT ---- */}
@@ -207,7 +207,7 @@ export default function RescheduleScreen({
               type="button"
               onClick={send}
               disabled={isSending || !chosenSlot}
-              className="flex-1 border-r border-line py-5 text-[11px] uppercase tracking-[0.3em] text-paper hover:bg-paper hover:text-ink disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-paper lg:py-6 lg:text-[13px]"
+              className="flex-1 border-r border-line py-5 text-[12px] uppercase tracking-[0.3em] text-paper hover:bg-paper hover:text-ink disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-paper lg:py-6 lg:text-[13px]"
             >
               {isSending ? 'Sending…' : 'Send email'}
             </button>
@@ -215,7 +215,7 @@ export default function RescheduleScreen({
               type="button"
               onClick={() => setIsEditing(!isEditing)}
               disabled={isSending}
-              className="flex-1 py-5 text-[11px] uppercase tracking-[0.3em] text-muted hover:text-paper lg:py-6 lg:text-[13px]"
+              className="flex-1 py-5 text-[12px] uppercase tracking-[0.3em] text-muted hover:text-paper lg:py-6 lg:text-[13px]"
             >
               {isEditing ? 'Done' : 'Edit'}
             </button>

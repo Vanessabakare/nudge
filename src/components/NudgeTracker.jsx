@@ -59,6 +59,7 @@ export default function NudgeTracker({ event }) {
         if (stage.isReached) markerClass = 'bg-paper'
         if (isCurrent) markerClass = 'bg-paper outline outline-1 outline-offset-2 outline-paper'
 
+        // Stages not reached yet are the one place text is faded further
         let labelClass = 'text-muted/50'
         if (stage.isReached) labelClass = 'text-muted'
         if (isCurrent) labelClass = 'text-paper'
@@ -66,12 +67,14 @@ export default function NudgeTracker({ event }) {
         return (
           <div key={index} className="relative flex flex-col items-center">
             <span className={`h-[7px] w-[7px] ${markerClass}`} />
-            <span className={`mt-4 text-center text-[8px] uppercase tracking-[0.2em] lg:text-[12px] ${labelClass}`}>
+            <span className={`mt-4 whitespace-nowrap text-center text-[12px] uppercase tracking-[0.04em] lg:tracking-[0.2em] ${labelClass}`}>
               {stage.label}
             </span>
+            {/* Planned time: day and clock on two lines on phone, one on desktop */}
             {stage.time && (
-              <span className="mt-1 text-center text-[7px] uppercase tracking-[0.15em] text-muted/60 lg:mt-2 lg:text-[12px]">
-                {stage.time}
+              <span className="mt-1 text-center text-[12px] uppercase leading-snug tracking-[0.04em] text-muted lg:mt-2 lg:tracking-[0.15em]">
+                <span className="block lg:inline">{stage.time.split(' ')[0]}</span>{' '}
+                <span className="block lg:inline">{stage.time.split(' ')[1]}</span>
               </span>
             )}
           </div>

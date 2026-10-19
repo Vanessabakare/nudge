@@ -44,7 +44,7 @@ export default function EventDetail({
       <BackLink desktopLabel={backLabel} onClick={onBack} />
 
       {/* ---- The date, set large ---- */}
-      <p className="mt-16 text-[10px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">
+      <p className="mt-16 text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">
         {formatWeekday(event.startTime)}
       </p>
       <h1 className="mt-3 font-serif text-[clamp(4rem,22vw,7rem)] leading-none tracking-tight text-paper lg:text-[8rem]">
@@ -55,7 +55,7 @@ export default function EventDetail({
       <h2 className="mt-12 text-[14px] uppercase leading-relaxed tracking-[0.25em] text-paper lg:text-[18px]">
         {event.title}
       </h2>
-      <div className="mt-6 space-y-2 text-[11px] uppercase tracking-[0.3em] text-muted lg:text-[13px]">
+      <div className="mt-6 space-y-2 text-[12px] uppercase tracking-[0.3em] text-muted lg:text-[13px]">
         <p>{formatTimeRange(event.startTime, event.endTime)}</p>
         <p>{event.location}</p>
         <p>{event.isVirtual ? 'Virtual' : 'In person'}</p>
@@ -71,7 +71,7 @@ export default function EventDetail({
         conflicts.map((conflict) => (
           <p
             key={conflict.id}
-            className="mt-14 border-l border-accent pl-4 text-[11px] uppercase leading-relaxed tracking-[0.25em] text-accent lg:text-[13px]"
+            className="mt-14 border-l border-accent pl-4 text-[12px] uppercase leading-relaxed tracking-[0.25em] text-accent lg:text-[13px]"
           >
             {conflictMessage(conflict)}
           </p>
@@ -82,7 +82,7 @@ export default function EventDetail({
         <button
           type="button"
           onClick={onReschedule}
-          className="mt-5 pl-4 text-[11px] uppercase tracking-[0.3em] text-paper hover:text-muted lg:text-[13px]"
+          className="mt-5 pl-4 text-[12px] uppercase tracking-[0.3em] text-paper hover:text-muted lg:text-[13px]"
         >
           Reschedule {conflicts[0].title} →
         </button>
@@ -90,7 +90,7 @@ export default function EventDetail({
 
       {/* ---- The two choices, or what was decided ---- */}
       {isAnswered ? (
-        <p className="mt-14 border-t border-line pt-6 text-[11px] uppercase tracking-[0.35em] text-muted lg:text-[13px]">
+        <p className="mt-14 border-t border-line pt-6 text-[12px] uppercase tracking-[0.35em] text-muted lg:text-[13px]">
           {settledMessages[event.status]}
         </p>
       ) : (
@@ -98,14 +98,14 @@ export default function EventDetail({
           <button
             type="button"
             onClick={() => onRespond('add')}
-            className="flex-1 border-r border-line py-5 text-[11px] uppercase tracking-[0.3em] text-paper hover:bg-paper hover:text-ink lg:py-6 lg:text-[13px]"
+            className="flex-1 border-r border-line py-5 text-[12px] uppercase tracking-[0.3em] text-paper hover:bg-paper hover:text-ink lg:py-6 lg:text-[13px]"
           >
             Add to calendar
           </button>
           <button
             type="button"
             onClick={() => onRespond('dismiss')}
-            className="flex-1 py-5 text-[11px] uppercase tracking-[0.3em] text-muted hover:text-paper lg:py-6 lg:text-[13px]"
+            className="flex-1 py-5 text-[12px] uppercase tracking-[0.3em] text-muted hover:text-paper lg:py-6 lg:text-[13px]"
           >
             Not for me
           </button>
@@ -115,10 +115,10 @@ export default function EventDetail({
       {/* ---- The original email, kept quiet ---- */}
       {email && (
         <section className="mt-20">
-          <p className="text-[9px] uppercase tracking-[0.4em] text-muted/70 lg:text-[12px]">
+          <p className="text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">
             Original email · {email.sender}
           </p>
-          <p className="mt-5 whitespace-pre-line text-[12px] leading-relaxed text-muted lg:text-[15px]">
+          <p className="mt-5 whitespace-pre-line text-[13px] leading-relaxed text-muted lg:text-[15px]">
             {email.body}
           </p>
         </section>

@@ -51,7 +51,9 @@ event = {
 ## Design rules (editorial, minimal, classy)
 Inspired by the feel of high-end fashion apps, but Nudge has its own original identity —
 never copy another brand's logo, wordmark or fonts.
-- Two typefaces with strict roles: a high-contrast serif (Bodoni Moda or Playfair Display) for big moments such as dates and the wordmark; a thin sans-serif (Jost) in UPPERCASE with wide letter-spacing for everything else.
+- Two typefaces with strict roles: a high-contrast serif (Bodoni Moda or Playfair Display) for big moments such as dates and the wordmark; a sans-serif (Jost) in UPPERCASE with wide letter-spacing for everything else.
+- Legibility: Jost is never lighter than weight 400 (regular). Minimum sizes on phone: small capital labels 12px, body and list text 13px. On desktop (1024px+): labels 12px or more, body 15px.
+- Never fade text further on top of the muted colour (no opacity or extra greys). Extra fading is only for genuinely inactive things: past days in the calendar and nudge stages not reached yet. The unselected nav tab uses the plain muted colour.
 - Huge amounts of empty space. Nothing crowded.
 - No shadows, no rounded cards, no gradients. Sharp edges and thin 1px lines.
 - Text labels instead of icons where possible (e.g. bottom nav says INBOX, CALENDAR).
@@ -59,7 +61,10 @@ never copy another brand's logo, wordmark or fonts.
 - One accent colour (warm terracotta), used rarely — only for conflicts and "act now" moments.
 - Nudge progress shown as a thin line with stages: SPOTTED → NUDGE 1 → NUDGE 2 → NUDGE 3 → ADDED.
 - Splash screen: the "Nudge" wordmark in the serif, very large, that slides into place slightly off-line and then settles (a literal nudge).
-- Colour palette: TO CONFIRM — either dark (near-black background, off-white text) or warm cream background with near-black text.
+- Colour palette: dark is the default, light is chosen in Settings. All colours come from the tokens in `src/index.css` (ink = background, paper = main text, muted, line, accent, scrim) — never hard-code colours in components.
+  - Dark:  background #0e0d0c, main text #ffffff, muted text #b3aba0, lines #34302c, accent #d98a6a
+  - Light: background #f6f2ec, main text #000000, muted text #5f584f, lines #d6cdc1, accent #a8502a
+  - scrim: the see-through dimming layer behind the nudge card, set for each theme
 
 ## Coding style
 - Simple, readable code over clever abstractions. A beginner should be able to follow it.

@@ -23,7 +23,7 @@ function StatusLabel({ event, extraClasses }) {
   return (
     <p
       className={
-        `inline-block text-[9px] uppercase tracking-[0.35em] lg:text-[12px] ${extraClasses} ` +
+        `inline-block text-[12px] uppercase tracking-[0.35em] lg:text-[12px] ${extraClasses} ` +
         (isWaiting ? 'border border-paper/50 px-2 py-1 text-paper' : 'py-1 text-muted')
       }
     >
@@ -42,7 +42,7 @@ export default function InboxList({ emails, events, now, onOpenEvent }) {
   return (
     <main className="mx-auto max-w-md px-6 pt-16 pb-32 animate-fade-in lg:mx-0 lg:max-w-5xl lg:px-16 lg:pt-20 lg:pb-20">
       {/* On desktop the left column carries the title instead */}
-      <h2 className="text-[11px] font-light uppercase tracking-[0.4em] text-paper lg:hidden">
+      <h2 className="text-[12px] uppercase tracking-[0.4em] text-paper lg:hidden">
         Inbox
       </h2>
 
@@ -54,13 +54,13 @@ export default function InboxList({ emails, events, now, onOpenEvent }) {
           const rowContents = (
             <>
               {/* Index number, e.g. |01| */}
-              <span className="w-9 shrink-0 pt-px text-[11px] tracking-[0.2em] text-muted lg:w-12 lg:text-[12px]">
+              <span className="w-9 shrink-0 pt-px text-[12px] tracking-[0.2em] text-muted lg:w-12 lg:text-[12px]">
                 |{formatIndex(position)}|
               </span>
 
               <div className="min-w-0 lg:flex-1">
                 {/* Sender */}
-                <p className="text-[10px] uppercase tracking-[0.35em] text-muted lg:text-[12px]">
+                <p className="text-[12px] uppercase tracking-[0.35em] text-muted lg:text-[12px]">
                   {email.sender}
                 </p>
 

@@ -45,7 +45,7 @@ export default function MonthGrid({ now, calendarEvents, onSelectDay }) {
   return (
     <main className="mx-auto max-w-md px-6 pt-16 pb-32 animate-fade-in lg:mx-0 lg:max-w-none lg:px-16 lg:pt-14 lg:pb-20">
       {/* Phone: the small section heading, as on the inbox */}
-      <p className="mb-10 text-[11px] font-light uppercase tracking-[0.4em] text-paper lg:hidden">
+      <p className="mb-10 text-[12px] uppercase tracking-[0.4em] text-paper lg:hidden">
         Calendar
       </p>
 
@@ -57,7 +57,7 @@ export default function MonthGrid({ now, calendarEvents, onSelectDay }) {
       {/* ---- Weekday headers ---- */}
       <div className="mt-10 grid grid-cols-7 pb-3 lg:mt-12 lg:pb-4">
         {weekdayHeaders.map((name) => (
-          <p key={name} className="text-[8px] uppercase tracking-[0.2em] text-muted lg:text-[12px] lg:tracking-[0.35em]">
+          <p key={name} className="text-[12px] uppercase tracking-[0.2em] text-muted lg:text-[12px] lg:tracking-[0.35em]">
             {name}
           </p>
         ))}
@@ -94,7 +94,7 @@ export default function MonthGrid({ now, calendarEvents, onSelectDay }) {
 
               {/* Count, only when there is more than one event */}
               {dayEvents.length > 1 && (
-                <span className="absolute top-1 right-1.5 text-[8px] text-muted lg:top-3 lg:right-3 lg:text-[12px] lg:tracking-[0.2em]">
+                <span className="absolute top-1 right-1.5 text-[12px] text-muted lg:top-3 lg:right-3 lg:text-[12px] lg:tracking-[0.2em]">
                   {dayEvents.length}
                 </span>
               )}

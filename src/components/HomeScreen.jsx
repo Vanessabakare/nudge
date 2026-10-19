@@ -29,7 +29,7 @@ function greetingFor(isoString) {
 // The small section headings, e.g. NEXT UP
 function SectionHeading({ children }) {
   return (
-    <h2 className="text-[10px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">{children}</h2>
+    <h2 className="text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[12px]">{children}</h2>
   )
 }
 
@@ -42,11 +42,11 @@ function EventRow({ position, timeLine, title, onClick, children }) {
         onClick={onClick}
         className="flex w-full gap-5 py-6 text-left lg:gap-6 lg:py-7 lg:hover:bg-paper/[0.03]"
       >
-        <span className="w-9 shrink-0 pt-px text-[11px] tracking-[0.2em] text-muted lg:w-12 lg:text-[12px]">
+        <span className="w-9 shrink-0 pt-px text-[12px] tracking-[0.2em] text-muted lg:w-12 lg:text-[12px]">
           |{formatIndex(position)}|
         </span>
         <div className="min-w-0">
-          <p className="text-[10px] uppercase tracking-[0.35em] text-muted lg:text-[12px]">{timeLine}</p>
+          <p className="text-[12px] uppercase tracking-[0.35em] text-muted lg:text-[12px]">{timeLine}</p>
           <p className="mt-2 text-[13px] uppercase leading-relaxed tracking-[0.15em] text-paper lg:text-[15px]">
             {title}
           </p>
@@ -98,7 +98,7 @@ export default function HomeScreen({
       </div>
 
       {/* ---- Greeting and today's date ---- */}
-      <p className="mt-16 text-[10px] uppercase tracking-[0.4em] text-muted lg:mt-20 lg:text-[12px]">
+      <p className="mt-16 text-[12px] uppercase tracking-[0.4em] text-muted lg:mt-20 lg:text-[12px]">
         {greetingFor(now)}
       </p>
       <h1 className="mt-4 font-serif text-[clamp(2.75rem,13vw,4rem)] leading-[1.05] tracking-tight text-paper lg:text-[5.5rem]">
@@ -116,13 +116,13 @@ export default function HomeScreen({
               title={nextUp.title}
               onClick={() => onOpenCalendarEvent(nextUp)}
             >
-              <p className="mt-1 text-[10px] uppercase leading-relaxed tracking-[0.3em] text-muted lg:text-[12px]">
+              <p className="mt-1 text-[12px] uppercase leading-relaxed tracking-[0.3em] text-muted lg:text-[12px]">
                 {nextUp.location}
               </p>
             </EventRow>
           </ol>
         ) : (
-          <p className="mt-6 text-[11px] uppercase tracking-[0.4em] text-muted lg:text-[13px]">
+          <p className="mt-6 text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[13px]">
             Nothing planned.
           </p>
         )}
@@ -144,11 +144,11 @@ export default function HomeScreen({
                   onClick={() => onOpenEvent(event.id)}
                 >
                   <div className="mt-4 flex gap-2">
-                    <span className="border border-paper/50 px-2 py-1 text-[9px] uppercase tracking-[0.35em] text-paper lg:text-[12px]">
+                    <span className="border border-paper/50 px-2 py-1 text-[12px] uppercase tracking-[0.35em] text-paper lg:text-[12px]">
                       {statusLabel(event)}
                     </span>
                     {hasClash && (
-                      <span className="border border-accent px-2 py-1 text-[9px] uppercase tracking-[0.35em] text-accent lg:text-[12px]">
+                      <span className="border border-accent px-2 py-1 text-[12px] uppercase tracking-[0.35em] text-accent lg:text-[12px]">
                         Clash
                       </span>
                     )}
@@ -158,7 +158,7 @@ export default function HomeScreen({
             })}
           </ol>
         ) : (
-          <p className="mt-6 text-[11px] uppercase tracking-[0.4em] text-muted lg:text-[13px]">
+          <p className="mt-6 text-[12px] uppercase tracking-[0.4em] text-muted lg:text-[13px]">
             All caught up.
           </p>
         )}
@@ -168,7 +168,7 @@ export default function HomeScreen({
       <button
         type="button"
         onClick={onShowInbox}
-        className="mt-16 flex w-full items-center justify-between border-y border-line py-5 text-[10px] uppercase tracking-[0.4em] lg:py-6 lg:text-[12px]"
+        className="mt-16 flex w-full items-center justify-between border-y border-line py-5 text-[12px] uppercase tracking-[0.4em] lg:py-6 lg:text-[12px]"
       >
         <span className="text-paper">Inbox · {emailCount} emails</span>
         <span className="text-muted">Show +</span>
