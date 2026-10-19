@@ -13,7 +13,7 @@
 import { useEffect, useState } from 'react'
 import { getEmails } from './sources/mockEmailSource.js'
 import { sampleCalendar } from './data/sampleCalendar.js'
-import { getNow, skipAhead } from './clock/demoClock.js'
+import { getNow, skipAhead, startAt } from './clock/demoClock.js'
 import { planNudgeTimes } from './logic/planNudgeTimes.js'
 import { checkNudges } from './logic/checkNudges.js'
 import { respondToNudge } from './logic/respondToNudge.js'
@@ -33,6 +33,9 @@ import BottomNav from './components/BottomNav.jsx'
 
 // How often the clock refreshes on its own, in ms
 const clockRefreshMs = 30 * 1000
+
+// The demo clock starts this long after the newest email arrived
+const demoStartGapMs = 5 * 60 * 1000
 
 // Gives an event its three planned nudges (none sent or answered yet)
 function withPlannedNudges(event, email) {
@@ -62,16 +65,41 @@ export default function App() {
   // Nudge banners the user has closed, e.g. "event-001-nudge-1"
   const [closedBanners, setClosedBanners] = useState([])
 
-  // ---- Load emails once, plan each event's nudges, send any already due ----
-  useEffect(() => {
+  // ---- Start (or restart) the demo ----
+  // Loads the emails, starts the demo clock just after the newest
+  // one arrived (so no nudge is due yet), and plans each event's nudges.
+  function startDemo() {
     getEmails().then((loadedEmails) => {
-      setEmails(loadedEmails)
+      const newestArrival = Math.max(
+        ...loadedEmails.map((email) => new Date(email.receivedAt).getTime()),
+      )
+      startAt(new Date(newestArrival + demoStartGapMs).toISOString())
+      const demoNow = getNow().toISOString()
+
       const plannedEvents = loadedEmails
         .filter((email) => email.extractedEvent)
         .map((email) => withPlannedNudges(email.extractedEvent, email))
-      setEvents(checkNudges(plannedEvents, getNow().toISOString()))
+
+      setEmails(loadedEmails)
+      setNow(demoNow)
+      setEvents(checkNudges(plannedEvents, demoNow))
     })
+  }
+
+  useEffect(() => {
+    startDemo()
   }, [])
+
+  // RESET in the demo strip: back to the very start, without the splash
+  function resetDemo() {
+    setCalendarEvents(sampleCalendar)
+    setClosedBanners([])
+    setActiveTab('Inbox')
+    setSelectedDay(null)
+    setScreen('home')
+    window.scrollTo(0, 0)
+    startDemo()
+  }
 
   // ---- Keep the clock ticking, and send nudges as they fall due ----
   function refreshClock() {
@@ -253,7 +281,7 @@ export default function App() {
   // The demo control sits above every screen; content starts below it
   return (
     <>
-      <DemoControl now={now} onSkip={skip} />
+      <DemoControl now={now} onSkip={skip} onReset={resetDemo} />
       <div className="pt-9 lg:flex">
         <DesktopSidebar activeTab={activeTab} subtitle={sidebarSubtitle} onSelectTab={selectTab} />
         <div className="lg:min-w-0 lg:flex-1">{content}</div>

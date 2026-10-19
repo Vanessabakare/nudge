@@ -5,8 +5,14 @@
 // from the real email text. Emails with no event have null.
 // "preview" is a short opening line for the inbox, like the
 // snippet Gmail provides.
+//
+// Arrival times are chosen for the demo: every event email came
+// in yesterday, so each first nudge is due at 8am today. The
+// newest email (the newsletter, early this morning) has no
+// event, and the demo clock starts just after it, so on a fresh
+// load nothing has been nudged yet.
 // ==========================================================
-import { daysFromNow, hoursAgo } from './dateHelpers.js'
+import { daysFromNow } from './dateHelpers.js'
 
 export const sampleEmails = [
   // ---- 01: Mandatory department meeting (in person, 2 days) ----
@@ -19,7 +25,7 @@ export const sampleEmails = [
       'We will cover next term\'s timetable and assessment changes.\n\n' +
       'Room 3.14, Arts Building, 2:00pm–3:00pm.\n\nBest,\nHelen',
     preview: "Attendance is mandatory — we will cover next term's timetable and assessment changes.",
-    receivedAt: hoursAgo(2), // earlier today
+    receivedAt: daysFromNow(-1, 17, 48), // yesterday evening
     extractedEvent: {
       id: 'event-001',
       title: 'Department meeting',
@@ -43,7 +49,7 @@ export const sampleEmails = [
       'The session runs online from 10:00am to 12:00pm. ' +
       'Your Zoom link will be sent the day before.\n\nSee you there,\nThe L&D team',
     preview: 'Thanks for signing up to Presenting with Confidence. Your Zoom link will follow.',
-    receivedAt: daysFromNow(-1, 16, 40), // yesterday afternoon
+    receivedAt: daysFromNow(-1, 14, 40), // yesterday afternoon
     extractedEvent: {
       id: 'event-002',
       title: 'Presenting with Confidence workshop',
@@ -90,7 +96,7 @@ export const sampleEmails = [
       'Soft wool, quiet colours, made to last. Discover the new autumn collection ' +
       'online and in store now. Free delivery on orders over £50.',
     preview: 'Soft wool, quiet colours, made to last. Discover the new autumn collection.',
-    receivedAt: daysFromNow(-2, 7, 30), // two days ago
+    receivedAt: daysFromNow(0, 6, 10), // early this morning (the newest email)
     extractedEvent: null,
   },
 
@@ -103,7 +109,7 @@ export const sampleEmails = [
       'Meet employers from tech, finance, media and the public sector. ' +
       'Bring copies of your CV.\n\nMain Hall, Student Union, 11:00am–4:00pm.',
     preview: 'Meet employers from tech, finance, media and the public sector. Bring copies of your CV.',
-    receivedAt: daysFromNow(-3, 11, 2), // three days ago
+    receivedAt: daysFromNow(-1, 11, 2), // yesterday late morning
     extractedEvent: {
       id: 'event-005',
       title: 'Graduate Careers Fair',
