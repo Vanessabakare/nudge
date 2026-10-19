@@ -13,7 +13,7 @@ This file says exactly how to replace each one.
 | Time and nudges | `src/clock/demoClock.js` + `checkNudges` | EventBridge Scheduler |
 | Event details from email | hand-written `extractedEvent` in sample data | Amazon Bedrock extraction |
 | Reschedule email text | `src/logic/draftRescheduleEmail.js` (template) | Amazon Bedrock drafting |
-| Who the user is | none (sample profile in Settings) | Amazon Cognito |
+| Who the user is | `src/settings/userProfile.js` (name typed on first visit) | Amazon Cognito |
 
 **Golden rule:** the browser never holds Gmail/Outlook tokens. All provider
 calls go through our own backend (Lambda + API Gateway). The doorway files
@@ -30,7 +30,9 @@ in `src/` call *our* API, which calls Google or Microsoft.
 - **Important:** signing in *with* Google through Cognito proves who the user is,
   but does **not** give us permission to read their Gmail. Connecting Gmail or
   Outlook is a separate step (the CONNECTIONS rows in Settings), described below.
-- Replace the sample `profile` in `SettingsScreen.jsx` with the signed-in user.
+- Make `getUserName()` in `src/settings/userProfile.js` return the signed-in user's
+  name (from the Cognito ID token) instead of the one typed on the onboarding screen.
+  Once sign-in exists, the onboarding screen can be skipped for signed-in users.
 
 ## 2. Connecting an account (shared by Gmail, Outlook and both calendars)
 

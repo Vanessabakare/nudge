@@ -24,7 +24,9 @@ import { findConflicts } from './logic/findConflicts.js'
 import { sendEmail } from './sources/mockEmailSender.js'
 import { applyTheme, getSavedTheme, saveTheme } from './settings/theme.js'
 import { clearSavedDemoState, takeResetRequestFromUrl } from './settings/demoState.js'
+import { getUserName, guestName, setUserName } from './settings/userProfile.js'
 import SplashScreen from './components/SplashScreen.jsx'
+import OnboardingScreen from './components/OnboardingScreen.jsx'
 import DesktopSidebar from './components/DesktopSidebar.jsx'
 import NudgeCard from './components/NudgeCard.jsx'
 import SettingsScreen from './components/SettingsScreen.jsx'
@@ -60,6 +62,14 @@ export default function App() {
 
   // Emails sent from Nudge (shown under SENT in Settings), newest first
   const [sentEmails, setSentEmails] = useState([])
+
+  // ---- The user's name (asked once, remembered in the browser) ----
+  // null means a first visit: show the onboarding screen
+  const [userName, setUserNameState] = useState(getUserName)
+
+  function saveUserName(name) {
+    setUserNameState(setUserName(name))
+  }
 
   // ---- Dark or light mode (remembered in the browser) ----
   const [theme, setTheme] = useState(getSavedTheme)
@@ -123,7 +133,7 @@ export default function App() {
   }, [])
 
   // RESET DEMO in Settings: back to the very start, without the splash.
-  // The dark/light choice is a preference, so it is kept.
+  // The name and the dark/light choice are preferences, so they are kept.
   function resetDemo() {
     clearSavedDemoState()
     setCalendarEvents(sampleCalendar)
@@ -280,6 +290,11 @@ export default function App() {
     return <SplashScreen onFinish={() => setShowSplash(false)} />
   }
 
+  // First visit: ask for a name before anything else
+  if (userName === null) {
+    return <OnboardingScreen onContinue={saveUserName} onSkip={() => saveUserName(guestName)} />
+  }
+
   let content
   if (screen === 'detail' && selectedEvent) {
     content = (
@@ -300,6 +315,7 @@ export default function App() {
         newEvent={rescheduleNewEvent}
         calendarEvents={calendarEvents}
         now={now}
+        userName={userName}
         onSend={sendReschedule}
         onBack={() => leaveReschedule(rescheduleFor.returnTo)}
       />
@@ -312,6 +328,8 @@ export default function App() {
     content = (
       <SettingsScreen
         now={now}
+        userName={userName}
+        onChangeName={saveUserName}
         theme={theme}
         sentEmails={sentEmails}
         backLabel={activeTab}
@@ -348,6 +366,7 @@ export default function App() {
         {activeTab === 'Home' && (
           <HomeScreen
             now={now}
+            userName={userName}
             events={events}
             calendarEvents={calendarEvents}
             emailCount={emails.length}

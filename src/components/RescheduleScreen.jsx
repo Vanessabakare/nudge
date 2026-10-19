@@ -12,10 +12,8 @@ import { useEffect, useRef, useState } from 'react'
 import { findFreeSlots, slotKindFor } from '../logic/findFreeSlots.js'
 import { draftRescheduleEmail, slotPhrase } from '../logic/draftRescheduleEmail.js'
 import { formatShortDate, formatTimeRange } from '../logic/formatDates.js'
+import { firstNameOf } from '../settings/userProfile.js'
 import BackLink from './BackLink.jsx'
-
-// The user's name, for signing the email (real accounts come later)
-const senderName = 'Vanessa'
 
 const minuteInMs = 60 * 1000
 
@@ -34,9 +32,13 @@ export default function RescheduleScreen({
   newEvent,
   calendarEvents,
   now,
+  userName,
   onSend,
   onBack,
 }) {
+  // Sign the email with the user's first name (no signature for Guest)
+  const senderName = firstNameOf(userName)
+
   // ---- Free slots: the calendar without the event being moved,
   // plus the new event, so the move can't create a fresh clash ----
   const durationMinutes = (new Date(eventToMove.endTime) - new Date(eventToMove.startTime)) / minuteInMs

@@ -1,21 +1,16 @@
 // ==========================================================
 // SettingsScreen
 // Opened from the round profile button on Home.
-// - PROFILE: name and email (sample values for the demo)
+// - PROFILE: the user's name (with CHANGE NAME) and email status
 // - CONNECTIONS: email and calendar accounts, all coming soon
 // - APPEARANCE: the dark / light switch
 // - SENT: emails sent from Nudge (e.g. reschedule requests)
 // - DEMO CONTROLS: the demo clock's time, SKIP and RESET DEMO
 // ==========================================================
+import { useState } from 'react'
 import { formatDemoTime } from '../logic/formatDates.js'
 import BackLink from './BackLink.jsx'
 import ThemeToggle from './ThemeToggle.jsx'
-
-// Sample profile for the demo (real accounts come with Cognito later)
-const profile = {
-  name: 'Vanessa',
-  email: 'vanessa@example.com',
-}
 
 const connections = ['Gmail', 'Google Calendar', 'Outlook']
 
@@ -57,6 +52,8 @@ function ActionRow({ label, onClick }) {
 
 export default function SettingsScreen({
   now,
+  userName,
+  onChangeName,
   theme,
   sentEmails,
   backLabel,
@@ -65,6 +62,21 @@ export default function SettingsScreen({
   onReset,
   onBack,
 }) {
+  // ---- CHANGE NAME: edit the name in place ----
+  const [isEditingName, setIsEditingName] = useState(false)
+  const [draftName, setDraftName] = useState(userName)
+
+  function startEditingName() {
+    setDraftName(userName)
+    setIsEditingName(true)
+  }
+
+  function saveName(formEvent) {
+    formEvent.preventDefault()
+    onChangeName(draftName)
+    setIsEditingName(false)
+  }
+
   // ---- Layout ----
   return (
     <main className="mx-auto max-w-md px-6 pt-10 pb-20 animate-fade-in lg:mx-0 lg:max-w-3xl lg:px-16 lg:pt-14">
@@ -76,12 +88,37 @@ export default function SettingsScreen({
 
       {/* ---- Profile ---- */}
       <Section title="Profile">
-        <Row label="Name">
-          <span className="text-[13px] normal-case tracking-[0.1em] text-paper lg:text-[15px]">{profile.name}</span>
-        </Row>
-        <Row label="Email">
-          <span className="text-[13px] normal-case tracking-[0.05em] lg:text-[15px]">{profile.email}</span>
-        </Row>
+        {isEditingName ? (
+          // The name row becomes a small form
+          <form onSubmit={saveName} className="border-t border-line py-5 lg:py-6">
+            <label htmlFor="settings-name" className="text-[12px] uppercase tracking-[0.3em] text-paper lg:text-[13px]">
+              Name
+            </label>
+            <input
+              id="settings-name"
+              type="text"
+              value={draftName}
+              onChange={(changeEvent) => setDraftName(changeEvent.target.value)}
+              maxLength={40}
+              autoFocus
+              className="mt-4 w-full border-b border-line bg-transparent pb-2 text-[15px] text-paper outline-none focus:border-paper lg:text-[17px]"
+            />
+            <div className="mt-5 flex gap-8 text-[12px] uppercase tracking-[0.35em] lg:text-[13px]">
+              <button type="submit" className="uppercase text-paper hover:text-muted">
+                Save
+              </button>
+              <button type="button" onClick={() => setIsEditingName(false)} className="uppercase text-muted hover:text-paper">
+                Cancel
+              </button>
+            </div>
+          </form>
+        ) : (
+          <Row label="Name">
+            <span className="text-[13px] normal-case tracking-[0.1em] text-paper lg:text-[15px]">{userName}</span>
+          </Row>
+        )}
+        <Row label="Email">Not connected yet</Row>
+        {!isEditingName && <ActionRow label="Change name" onClick={startEditingName} />}
       </Section>
 
       {/* ---- Connections ---- */}

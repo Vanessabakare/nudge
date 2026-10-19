@@ -2,7 +2,7 @@
 // HomeScreen
 // The first screen after the splash. From top to bottom:
 // - a top bar: the small "Nudge" wordmark and a round profile
-//   button that opens Settings
+//   button (the user's initial) that opens Settings
 // - a greeting for the time of day, and today's date, large
 // - NEXT UP: the next event in the calendar
 // - NEEDS YOUR ANSWER: events still waiting for ADD or NOT FOR ME
@@ -12,18 +12,22 @@
 import { findConflicts } from '../logic/findConflicts.js'
 import { formatLongDate, formatShortDate, formatTimeRange } from '../logic/formatDates.js'
 import { isWaitingForAnswer, statusLabel } from '../logic/statusLabel.js'
+import { firstNameOf, initialOf, isGuest } from '../settings/userProfile.js'
 
 // Turns 0 into "01", 4 into "05", and so on.
 function formatIndex(position) {
   return String(position + 1).padStart(2, '0')
 }
 
-// "Good morning" before noon, "Good afternoon" until 6pm, then "Good evening"
-function greetingFor(isoString) {
+// "Good morning" before noon, "Good afternoon" until 6pm, then "Good evening",
+// followed by the first name if there is one: "Good afternoon, Sam"
+function greetingFor(isoString, userName) {
   const hour = new Date(isoString).getHours()
-  if (hour < 12) return 'Good morning'
-  if (hour < 18) return 'Good afternoon'
-  return 'Good evening'
+  let greeting = 'Good evening'
+  if (hour < 12) greeting = 'Good morning'
+  else if (hour < 18) greeting = 'Good afternoon'
+  const firstName = firstNameOf(userName)
+  return firstName ? `${greeting}, ${firstName}` : greeting
 }
 
 // The small section headings, e.g. NEXT UP
@@ -59,6 +63,7 @@ function EventRow({ position, timeLine, title, onClick, children }) {
 
 export default function HomeScreen({
   now,
+  userName,
   events,
   calendarEvents,
   emailCount,
@@ -93,13 +98,14 @@ export default function HomeScreen({
           aria-label="Profile and settings"
           className="flex h-9 w-9 items-center justify-center rounded-full border border-paper/50 text-[12px] uppercase text-paper hover:bg-paper hover:text-ink lg:h-10 lg:w-10 lg:text-[13px]"
         >
-          V
+          {/* The initial; for Guest a dot, drawn larger so it is easy to see */}
+          <span className={isGuest(userName) ? 'text-[26px] leading-none' : ''}>{initialOf(userName)}</span>
         </button>
       </div>
 
       {/* ---- Greeting and today's date ---- */}
       <p className="mt-16 text-[12px] uppercase tracking-[0.4em] text-muted lg:mt-20 lg:text-[12px]">
-        {greetingFor(now)}
+        {greetingFor(now, userName)}
       </p>
       <h1 className="mt-4 font-serif text-[clamp(2.75rem,13vw,4rem)] leading-[1.05] tracking-tight text-paper lg:text-[5.5rem]">
         {formatLongDate(now)}

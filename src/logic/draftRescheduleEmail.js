@@ -22,6 +22,7 @@ export function slotPhrase(slot) {
   return `${formatLongDate(slot.startTime)}, ${timeRangeForEmail(slot.startTime, slot.endTime)}`
 }
 
+// senderName signs the email; leave it empty (e.g. for Guest) for no signature
 export function draftRescheduleEmail({ event, newSlot, senderName }) {
   const greetingName = event.organiserName || 'there'
   const oldDay = formatLongDate(event.startTime) // e.g. "Thursday 22 October"
@@ -34,7 +35,7 @@ export function draftRescheduleEmail({ event, newSlot, senderName }) {
       `Hi ${greetingName},\n\n` +
       `Something has come up that clashes with our plans on ${oldDay} (${oldTime}). ` +
       `Would ${slotPhrase(newSlot)} work for you instead?\n\n` +
-      `Sorry for the shuffle, and thank you.\n\n` +
-      `${senderName}`,
+      `Sorry for the shuffle, and thank you.` +
+      (senderName ? `\n\n${senderName}` : ''),
   }
 }
