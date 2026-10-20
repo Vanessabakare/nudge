@@ -106,6 +106,9 @@ export default function App() {
   // The day picked in the month grid (null = show the grid)
   const [selectedDay, setSelectedDay] = useState(null)
 
+  // Phone inbox filter: "all" or "events" (kept here so it survives opening an email)
+  const [inboxFilter, setInboxFilter] = useState('all')
+
   // Which month the grid shows: 0 = the demo clock's month, 1 = next month...
   const [monthOffset, setMonthOffset] = useState(0)
 
@@ -154,6 +157,7 @@ export default function App() {
     setActiveTab('Home')
     setSelectedDay(null)
     setMonthOffset(0)
+    setInboxFilter('all')
     setScreen('home')
     window.scrollTo(0, 0)
     startDemo()
@@ -534,7 +538,15 @@ export default function App() {
         )}
 
         {activeTab === 'Inbox' && (
-          <InboxList emails={emails} events={events} now={now} onOpenEvent={openEvent} />
+          <InboxList
+            emails={emails}
+            events={events}
+            calendarEvents={calendarEvents}
+            now={now}
+            filter={inboxFilter}
+            onChangeFilter={setInboxFilter}
+            onOpenEvent={openEvent}
+          />
         )}
 
         {/* Calendar: the month grid, or the agenda from a picked day */}

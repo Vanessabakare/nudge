@@ -95,6 +95,25 @@ export function formatShortDate(isoString) {
   return `${weekday} ${formatDayMonth(isoString)}`
 }
 
+// When an email arrived, short and in sentence case (the phone inbox):
+// today -> "9:12" (24-hour clock), the day before -> "Yesterday",
+// this past week -> "Sun", older -> "12 Oct"
+export function formatReceivedShort(nowIso, receivedIso) {
+  const startOfToday = new Date(nowIso)
+  startOfToday.setHours(0, 0, 0, 0)
+  const received = new Date(receivedIso)
+  const startOfReceivedDay = new Date(received)
+  startOfReceivedDay.setHours(0, 0, 0, 0)
+  const daysAgo = Math.round((startOfToday - startOfReceivedDay) / (24 * 60 * 60 * 1000))
+
+  if (daysAgo <= 0) {
+    return `${received.getHours()}:${String(received.getMinutes()).padStart(2, '0')}`
+  }
+  if (daysAgo === 1) return 'Yesterday'
+  if (daysAgo < 7) return received.toLocaleDateString('en-GB', { weekday: 'short' })
+  return received.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+
 // -> "October" (the month name, as written; used large in the serif)
 export function formatMonthName(isoString) {
   return new Date(isoString).toLocaleDateString('en-GB', { month: 'long' })
